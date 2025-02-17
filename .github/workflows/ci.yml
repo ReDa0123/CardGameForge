@@ -1,0 +1,42 @@
+name: CI
+
+on:
+    push:
+        branches: ['master']
+    pull_request:
+        branches: ['master']
+
+jobs:
+    build-and-lint:
+        runs-on: ubuntu-latest
+
+        steps:
+            # 1) Checkout repository
+            - name: Check out code
+              uses: actions/checkout@v3
+
+            # 2) Set up Node
+            - name: Use Node.js 18
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+
+            # 3) Install dependencies
+            - name: Install deps
+              run: npm install
+
+            # 4) Run Prettier check
+            - name: Check Prettier
+              run: npm run prettier
+
+            # 5) Run ESLint
+            - name: Run ESLint
+              run: npm run lint
+
+            # 6) Build server
+            - name: Build server
+              run: npm run build:server
+
+            # 7) Build client
+            - name: Build client
+              run: npm run build:client
