@@ -2,7 +2,9 @@
     "compilerOptions": {
         "strict": true,
         "esModuleInterop": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "declaration": true,
+        "declarationDir": "dist/types"
     },
     "exclude": ["node_modules", "dist"]
 }
