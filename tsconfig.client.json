@@ -2,12 +2,11 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "outDir": "dist/client",
-        "rootDir": "src/client",
         "target": "ES2020",
         "module": "ESNext",
         "lib": ["DOM", "ES2020"],
         "jsx": "react-jsx"
     },
-    "include": ["src/client/**/*"],
+    "include": ["src/client/**/*", "src/shared/**/*"],
     "exclude": ["node_modules"]
 }

@@ -4,7 +4,10 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "declaration": true,
-        "declarationDir": "dist/types"
+        "declarationDir": "dist/types",
+        "rootDir": "src",
+        "allowSyntheticDefaultImports": true,
+        "types": ["jest", "node"]
     },
     "exclude": ["node_modules", "dist"]
 }
