@@ -1,12 +1,17 @@
-import { ActionTemplate } from '../../types/gameConfig';
-import { Teams } from '../../types/gameState';
+import { ActionTemplate, Teams } from '../../types';
 import { actionTypes } from './actionTypes';
-import { changeStateValue } from './utils';
+import { assocByDotPath } from './utils';
 
-const setTeams: ActionTemplate<Teams> = {
+export type SetTeamsPayload = Teams;
+
+/**
+ * Action to set the teams in the game.
+ * Payload - The teams object.
+ */
+const setTeams: ActionTemplate<SetTeamsPayload> = {
     name: actionTypes.SET_TEAMS,
     apply: (payload, ctx) => {
-        return changeStateValue(ctx.getState(), 'coreState.teams', payload);
+        return assocByDotPath(ctx.getState(), 'coreState.teams', payload);
     },
 };
 

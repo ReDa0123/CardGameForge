@@ -1,8 +1,7 @@
-import { GameConfig } from '../../types/gameConfig';
+import { GameConfig } from '../../types';
 
 /**
- * We store a single "loadedConfig" that can have any generics.
- * If your server is single-tenant for one set of generics, this is fine.
+ * The currently loaded game configuration.
  */
 let loadedConfig: GameConfig<any, any, any, any> = {} as GameConfig<any, any, any, any>;
 

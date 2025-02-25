@@ -1,5 +1,12 @@
-import { GameState, HistoryRecord, Metadata, NetworkState } from '../../types/gameState';
-import { Card, CardTemplate, Zone } from '../../types/gameObjects';
+import {
+    GameState,
+    HistoryRecord,
+    Metadata,
+    NetworkState,
+    Card,
+    CardTemplate,
+    Zone,
+} from '../../types';
 
 export const getInitialGameState = (
     customValues: Partial<
@@ -36,7 +43,7 @@ export const getInitialGameState = (
 
 export const getMeta = (): Metadata => ({
     roomId: 'roomId',
-    timestamp: Date.now(),
+    timestamp: new Date(),
 });
 
 export const getCard = (id: string): Card<any> => ({

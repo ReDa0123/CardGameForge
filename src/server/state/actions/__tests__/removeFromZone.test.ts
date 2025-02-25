@@ -1,6 +1,6 @@
 import removeFromZone from '../removeFromZone';
 import { getCard, getInitialGameState, getMeta } from '../testUtils';
-import { StateContext } from '../../../types/gameState';
+import { StateContext } from '../../../types';
 
 describe('removeFromZone action', () => {
     it('should remove a single card from a zone if zone exists', () => {

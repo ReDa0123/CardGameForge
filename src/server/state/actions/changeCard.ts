@@ -1,6 +1,5 @@
-import { ActionTemplate } from '../../types/gameConfig';
+import { ActionTemplate, Card } from '../../types/';
 import { actionTypes } from './actionTypes';
-import { Card } from '../../types/gameObjects';
 
 export type ChangeCardPayload = {
     cardId: string;
@@ -8,6 +7,10 @@ export type ChangeCardPayload = {
     cardChanges: Partial<Card<any>>;
 };
 
+/**
+ * Action to change a card's properties.
+ * Payload - The ID of the card to change, the zone it's in, and the changes to apply.
+ */
 const changeCard: ActionTemplate<ChangeCardPayload> = {
     name: actionTypes.CHANGE_CARD,
     apply: (payload, ctx, meta): ReturnType<typeof ctx.getState> => {
@@ -15,14 +18,14 @@ const changeCard: ActionTemplate<ChangeCardPayload> = {
         const state = ctx.getState();
         const zone = state.coreState.zones[zoneId];
         if (!zone) {
-            if (ctx.loadedConfig?.logConnections) {
+            if (ctx.loadedConfig?.logErrors) {
                 console.error(`${meta.roomId}: Zone ${zoneId} does not exist`);
             }
             return { ...state };
         }
         const card = zone.cards.find((c) => c.id === cardId);
         if (!card) {
-            if (ctx.loadedConfig?.logConnections) {
+            if (ctx.loadedConfig?.logErrors) {
                 console.error(`${meta.roomId}: Card ${cardId} does not exist in zone ${zoneId}`);
             }
             return { ...state };

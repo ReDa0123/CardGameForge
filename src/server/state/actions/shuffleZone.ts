@@ -1,20 +1,29 @@
-import { ActionTemplate } from '../../types/gameConfig';
+import { ActionTemplate } from '../../types';
 import { actionTypes } from './actionTypes';
-import { changeStateValue } from './utils';
+import { assocByDotPath } from './utils';
 
-const shuffleZone: ActionTemplate<string> = {
+export type ShuffleZonePayload = {
+    zoneId: string;
+};
+
+/**
+ * Action to shuffle the cards in a zone.
+ * Payload - The ID of the zone to shuffle.
+ */
+const shuffleZone: ActionTemplate<ShuffleZonePayload> = {
     name: actionTypes.SHUFFLE_ZONE,
     apply: (payload, ctx, meta) => {
         const state = ctx.getState();
-        const zone = state.coreState.zones[payload];
+        const zoneId = payload.zoneId;
+        const zone = state.coreState.zones[zoneId];
         if (!zone) {
-            if (ctx.loadedConfig?.logConnections) {
-                console.error(`${meta.roomId}: Zone ${payload} does not exist`);
+            if (ctx.loadedConfig?.logErrors) {
+                console.error(`${meta.roomId}: Zone ${zoneId} does not exist`);
             }
             return { ...state };
         }
         const shuffledCards = ctx.randomize(zone.cards);
-        return changeStateValue(state, `coreState.zones.${payload}.cards`, shuffledCards);
+        return assocByDotPath(state, `coreState.zones.${zoneId}.cards`, shuffledCards);
     },
 };
 

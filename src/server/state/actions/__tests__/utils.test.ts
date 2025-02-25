@@ -1,4 +1,4 @@
-import { changeStateValue } from '../utils';
+import { assocByDotPath } from '../utils';
 
 describe('changeStateValue', () => {
     it('should update a nested value in an object based on a dot-separated path', () => {
@@ -14,7 +14,7 @@ describe('changeStateValue', () => {
                 history: value,
             },
         };
-        const result = changeStateValue(obj, path, value);
+        const result = assocByDotPath(obj, path, value);
         expect(result).toEqual(expected);
     });
 
@@ -31,7 +31,7 @@ describe('changeStateValue', () => {
                 history: value,
             },
         };
-        const result = changeStateValue(obj, path, value);
+        const result = assocByDotPath(obj, path, value);
         expect(result).toEqual(expected);
     });
 
@@ -49,7 +49,7 @@ describe('changeStateValue', () => {
         };
         const path = 'coreState.otherState.nested.value';
         const value = 100;
-        const result = changeStateValue(obj, path, value);
+        const result = assocByDotPath(obj, path, value);
         const expected = {
             coreState: {
                 history: [],
@@ -72,7 +72,7 @@ describe('changeStateValue', () => {
         };
         const path = 'coreState.history';
         const value = [{ id: 1, action: 'test' }];
-        const result = changeStateValue(obj, path, value);
+        const result = assocByDotPath(obj, path, value);
         expect(obj).not.toEqual(result);
     });
 });

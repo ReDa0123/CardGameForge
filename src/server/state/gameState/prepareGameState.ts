@@ -1,17 +1,25 @@
-import { GameConfig } from '../../types/gameConfig';
 import { createBaseRoomGameData, setRoomGameState } from './roomGameData';
 import { createAction } from './createAction';
 import { actionTypes, allLibActions } from '../actions';
 import {
     ActionApply,
     GameState,
+    GameConfig,
     HistoryRecord,
     NetworkState,
     TurnOrder,
-} from '../../types/gameState';
-import { Zone } from '../../types/gameObjects';
+    Zone,
+    Metadata,
+} from '../../types';
 import { createStateContext } from './createStateContext';
 
+/**
+ * Prepare the initial game state for a room.
+ * @param roomId The ID of the room
+ * @param gameConfig The game configuration
+ * @param roomNetworkState The network state of the room
+ * @param gameOptions Optional game options
+ */
 export const prepareGameState = <
     CustomState,
     CustomGameOptions,
@@ -133,14 +141,14 @@ export const prepareGameState = <
         };
     };
 
-    stateContext.dispatchAction(
-        actionTypes.SET_TURN_ORDER,
-        { turnOrder: getDefaultTurnOrder() },
-        { roomId, timestamp: Date.now() }
-    );
+    stateContext.dispatchAction<TurnOrder>(actionTypes.SET_TURN_ORDER, getDefaultTurnOrder(), {
+        roomId,
+        timestamp: new Date(),
+    });
 
     // Call gameSetup function
-    const finalInitialGameState = gameConfig.gameSetup(stateContext);
+    const meta: Metadata = { roomId, timestamp: new Date() };
+    const finalInitialGameState = gameConfig.gameSetup(stateContext, meta);
 
     // Overwrite the state with the result of gameSetup
     setRoomGameState(roomId, finalInitialGameState);

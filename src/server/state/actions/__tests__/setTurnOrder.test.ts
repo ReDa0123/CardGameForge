@@ -1,5 +1,5 @@
 import setTurnOrder from '../setTurnOrder';
-import { TurnOrder, StateContext } from '../../../types/gameState';
+import { TurnOrder, StateContext } from '../../../types';
 import { getInitialGameState, getMeta } from '../testUtils';
 
 describe('setTurnOrder action', () => {

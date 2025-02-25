@@ -1,7 +1,12 @@
-import { ActionTemplate } from '../../types/gameConfig';
+import { ActionTemplate } from '../../types';
 import { actionTypes } from './actionTypes';
 
-const endTurn: ActionTemplate<object> = {
+export type EndTurnPayload = object;
+
+/**
+ * Action to end the current player's turn.
+ */
+const endTurn: ActionTemplate<EndTurnPayload> = {
     name: actionTypes.END_TURN,
     apply: (payload, ctx) => {
         const state = ctx.getState();

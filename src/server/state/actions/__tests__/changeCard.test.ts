@@ -1,6 +1,6 @@
 import changeCard, { ChangeCardPayload } from '../changeCard';
 import { getCard, getInitialGameState, getMeta } from '../testUtils';
-import { StateContext } from '../../../types/gameState';
+import { StateContext } from '../../../types';
 
 const initialState = getInitialGameState({
     zones: {

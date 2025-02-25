@@ -7,7 +7,7 @@ type DotPath = string;
  * @param value - The new value to set at the specified path.
  * @returns A new object with the updated value at the given path.
  */
-export const changeStateValue = <T>(obj: T, path: DotPath, value: unknown): T => {
+export const assocByDotPath = <T>(obj: T, path: DotPath, value: unknown): T => {
     const keys = path.split('.');
 
     // Recursively build the updated object

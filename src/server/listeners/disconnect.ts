@@ -2,7 +2,7 @@ import { Server, Socket } from 'socket.io';
 import { events } from '../../shared/constants/events';
 import { getNetworkState } from '../state';
 import { getRoomGameData, removeRoomGameData } from '../state';
-import { GameConfig } from '../types/gameConfig';
+import { GameConfig } from '../types';
 
 const disconnect =
     <
@@ -15,11 +15,14 @@ const disconnect =
         socket: Socket,
         gameConfig: GameConfig<CustomState, CustomGameOptions, CustomZone, CustomCard>
     ) =>
+    /**
+     * Disconnect listener.
+     */
     () => {
         const networkState = getNetworkState(io, socket.roomId);
         if (networkState) {
             const roomId = socket.roomId!;
-            if (gameConfig.logConnections) {
+            if (gameConfig.logErrors) {
                 console.log(`${socket.id} disconnected from room ${roomId}`);
             }
             io.to(roomId).emit(events.rooms.ROOM_STATE_CHANGED, networkState);

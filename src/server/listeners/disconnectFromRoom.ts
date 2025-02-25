@@ -2,7 +2,7 @@ import { Server, Socket } from 'socket.io';
 import { events } from '../../shared/constants/events';
 import { getNetworkState } from '../state';
 import { getRoomGameData, removeRoomGameData } from '../state';
-import { GameConfig } from '../types/gameConfig';
+import { GameConfig } from '../types';
 
 const disconnectFromRoom =
     <
@@ -15,6 +15,9 @@ const disconnectFromRoom =
         socket: Socket,
         gameConfig: GameConfig<CustomState, CustomGameOptions, CustomZone, CustomCard>
     ) =>
+    /**
+     * Disconnect from room listener.
+     */
     () => {
         const roomId = socket.roomId;
         socket.roomId = undefined;
@@ -24,7 +27,7 @@ const disconnectFromRoom =
             return;
         }
 
-        if (gameConfig.logConnections) {
+        if (gameConfig.logErrors) {
             console.log(`${socket.id} disconnected from room ${roomId}`);
         }
 

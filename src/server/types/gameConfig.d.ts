@@ -2,6 +2,7 @@ import {
     ActionDefinition,
     EndGameResult,
     GameState,
+    Metadata,
     MoveDefinition,
     StateContext,
 } from './gameState';
@@ -24,10 +25,15 @@ export type AfterGameEndFn<
     CGO,
     CZ extends Record<string, any>,
     CC extends Record<string, any>
-> = (ctx: StateContext<CS, CGO, CZ, CC>, result: EndGameResult) => GameState<CS, CGO, CZ, CC>;
+> = (
+    ctx: StateContext<CS, CGO, CZ, CC>,
+    result: EndGameResult,
+    meta: Metadata
+) => GameState<CS, CGO, CZ, CC>;
 
 export type GameSetupFn<CS, CGO, CZ extends Record<string, any>, CC extends Record<string, any>> = (
-    ctx: StateContext<CS, CGO, CZ, CC>
+    ctx: StateContext<CS, CGO, CZ, CC>,
+    meta: Metadata
 ) => GameState<CS, CGO, CZ, CC>;
 
 export type ConfigZone<CZ extends Record<string, any>> = {
@@ -71,5 +77,5 @@ export type GameConfig<
     zones: ConfigZone<CustomZone>[];
     cardCollection: CardTemplate<CustomCard>[];
     gameSetup: GameSetupFn<CustomState, CustomGameOptions, CustomZone, CustomCard>;
-    logConnections?: boolean;
+    logErrors?: boolean;
 };

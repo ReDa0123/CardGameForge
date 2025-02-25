@@ -1,7 +1,6 @@
 import { Server, Socket } from 'socket.io';
-import { GameConfig } from '../types/gameConfig';
+import { GameConfig, Metadata, MoveDefinition } from '../types';
 import { getRoomGameData, getNetworkState, executeMove } from '../state';
-import { Metadata } from '../types/gameState';
 import { events } from '../../shared/constants/events';
 
 type PlayMoveArgs = {
@@ -20,11 +19,16 @@ const playMove =
         socket: Socket,
         gameConfig: GameConfig<CustomState, CustomGameOptions, CustomZone, CustomCard>
     ) =>
+    /**
+     * Play move listener.
+     * @param moveName
+     * @param payload
+     */
     ({ moveName, payload }: PlayMoveArgs) => {
         const roomId = socket.roomId;
         const roomNetworkState = getNetworkState(io, roomId);
         if (!roomNetworkState || !roomId) {
-            if (gameConfig.logConnections) {
+            if (gameConfig.logErrors) {
                 console.log(`${socket.id} is not in a room`);
             }
             return;
@@ -35,14 +39,14 @@ const playMove =
         const gameState = gameData?.gameState;
 
         if (!gameData || !gameState) {
-            if (gameConfig.logConnections) {
+            if (gameConfig.logErrors) {
                 console.log(`No game data found for room ${roomId}`);
             }
             return;
         }
 
         if (!gameState.coreState.gameInProgress) {
-            if (gameConfig.logConnections) {
+            if (gameConfig.logErrors) {
                 console.log(`Game not in progress`);
             }
             return;
@@ -53,7 +57,7 @@ const playMove =
         const playerId = socket.id;
 
         if (activePlayer !== playerId) {
-            if (gameConfig.logConnections) {
+            if (gameConfig.logErrors) {
                 console.log(`${playerId} is not the active player`);
             }
             return;
@@ -62,7 +66,7 @@ const playMove =
         const move = gameData.movesRegistry.getMove(moveName);
 
         if (!move) {
-            if (gameConfig.logConnections) {
+            if (gameConfig.logErrors) {
                 console.log(`Move ${moveName} not found`);
             }
             return;
@@ -72,7 +76,7 @@ const playMove =
             roomId,
             playerId,
             playerNickname: socket.nickname,
-            timestamp: Date.now(),
+            timestamp: new Date(),
             moveId: moveName,
         };
 
@@ -83,10 +87,14 @@ const playMove =
             CustomGameOptions,
             CustomZone,
             CustomCard
-        >(move, payload, meta);
+        >(
+            move as MoveDefinition<unknown, CustomState, CustomGameOptions, CustomZone, CustomCard>,
+            payload,
+            meta
+        );
 
         if (!didExecute) {
-            if (gameConfig.logConnections) {
+            if (gameConfig.logErrors) {
                 console.log(`Move ${moveName} did not execute. ${reason}`);
             }
             socket.emit(events.MOVE_FAILED, reason);

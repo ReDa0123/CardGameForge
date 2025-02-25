@@ -5,14 +5,14 @@ import { getRoomGameData, setRoomGameState } from './roomGameData';
 import {
     ExtendedPayload,
     GameState,
+    HistoryRecord,
     Metadata,
     PayloadHistoryRecord,
     StateContext,
-} from '../../types/gameState';
+} from '../../types';
 import { historyRecordsTypes } from '../../constants';
 import { getLoadedConfig } from './gameConfig';
-import endGame from '../actions/endGame';
-import { actionTypes } from '../actions';
+import { endGameApply, actionTypes } from '../actions';
 
 /**
  * Returns a function that, when given an array,
@@ -28,8 +28,6 @@ export const getRandomize = (seed?: number | string) => {
     return <T>(array: T[]): T[] => {
         const shuffled = [...array];
         for (let i = shuffled.length - 1; i > 0; i--) {
-            // rng() returns a float [0, 1), so multiply by (i + 1)
-            // to pick an index up to i inclusive.
             const j = Math.floor(rng() * (i + 1));
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
@@ -46,24 +44,25 @@ export const getRandomize = (seed?: number | string) => {
  *   exportFn("./exports"); // writes ./exports/{1684067882284}|"filename".json
  */
 const getExportHistory =
-    <
-        CustomState,
-        CustomGameOptions,
-        CustomZone extends Record<string, any>,
-        CustomCard extends Record<string, any>
-    >(
-        getStateHistory: () => GameState<
-            CustomState,
-            CustomGameOptions,
-            CustomZone,
-            CustomCard
-        >['coreState']['history']
-    ) =>
-    (relativePath: string, filename?: string) => {
+    (getStateHistory: () => HistoryRecord<any>[]) => (relativePath: string, filename?: string) => {
         const history = getStateHistory();
-        const fileName = filename ?? `${Date.now()}.json`;
+        const historyWithReadableDates = history.map((record) => ({
+            ...record,
+            meta: {
+                ...record.meta,
+                timestamp: record.meta.timestamp.toISOString(),
+            },
+            payloadHistory: record.payloadHistory?.map((payloadRecord) => ({
+                ...payloadRecord,
+                payload: {
+                    ...payloadRecord.payload,
+                    timestamp: payloadRecord.payload.timestamp.toISOString(),
+                },
+            })),
+        }));
+        const fileName = filename ?? `${new Date()}.json`;
         const fullPath = path.join(relativePath, fileName);
-        const jsonData = JSON.stringify(history, null, 2);
+        const jsonData = JSON.stringify(historyWithReadableDates, null, 2);
         try {
             fs.writeFileSync(fullPath, jsonData, 'utf8');
         } catch (err) {
@@ -75,8 +74,8 @@ const getExportHistory =
  * Creates a `StateContext` object for a given room.
  * The context provides access to the current game state and
  * allows dispatching actions to update the state.
- * Also provides access to the randomize function and history export function.
- *
+ * Also provides access to the randomize function and history export function
+ * and card creation function.
  * @param roomId
  */
 export const createStateContext = <
@@ -87,23 +86,21 @@ export const createStateContext = <
 >(
     roomId: string
 ): StateContext<CustomState, CustomGameOptions, CustomZone, CustomCard> => {
-    const gameData = getRoomGameData(roomId);
+    const gameData = getRoomGameData<CustomState, CustomGameOptions, CustomZone, CustomCard>(
+        roomId
+    );
     if (!gameData) {
         throw new Error('Room not found');
     }
 
-    const getState = <
-        CustomState,
-        CustomGameOptions,
-        CustomZone extends Record<string, any>,
-        CustomCard extends Record<string, any>
-    >(): GameState<CustomState, CustomGameOptions, CustomZone, CustomCard> =>
-        gameData.gameState as GameState<CustomState, CustomGameOptions, CustomZone, CustomCard>;
+    const getState = (): GameState<CustomState, CustomGameOptions, CustomZone, CustomCard> => {
+        return gameData.gameState;
+    };
 
     const randomize = getRandomize(gameData.gameState.coreState.randomSeed);
 
-    const exportHistory = getExportHistory<CustomState, CustomGameOptions, CustomZone, CustomCard>(
-        () => getState().coreState.history
+    const exportHistory = getExportHistory(
+        () => getState().coreState.history as HistoryRecord<any>[]
     );
 
     const getActionRegistry = () => gameData.actionRegistry;
@@ -124,21 +121,35 @@ export const createStateContext = <
         removeAfterHook: gameData.actionRegistry.removeAfterHook,
         exportHistory,
         loadedConfig,
+        createCardFromTemplate: gameData.createCardFromTemplate,
     };
 
     context.dispatchAction = <ActionPayload = unknown>(
         actionName: string,
-        payload: ExtendedPayload<ActionPayload>,
+        payload: ActionPayload,
         meta: Metadata
     ): GameState<CustomState, CustomGameOptions, CustomZone, CustomCard> => {
         // Get the action from the registry
         const action = gameData.actionRegistry.getAction(actionName);
         if (!action) {
-            throw new Error('Action not found');
+            if (loadedConfig.logErrors) {
+                console.error(`Action ${actionName} not found`);
+                return getState();
+            }
+        }
+
+        // Check that payload is an object
+        if (typeof payload !== 'object') {
+            if (loadedConfig.logErrors) {
+                console.error(`Payload for action ${actionName} should be an object`);
+                return getState();
+            }
         }
 
         // Create a history record for the action
-        let changedPayload = { ...payload };
+        let changedPayload = {
+            ...payload,
+        } as ExtendedPayload<ActionPayload>;
         const payloadHistory: PayloadHistoryRecord<ExtendedPayload<ActionPayload>>[] = [
             {
                 payload: changedPayload,
@@ -156,7 +167,7 @@ export const createStateContext = <
             const enhancedMeta: Metadata = { ...actionMeta, hookId };
             // Apply the hook
             const newPayload = hook.hookApply<
-                unknown,
+                ActionPayload,
                 CustomState,
                 CustomGameOptions,
                 CustomZone,
@@ -185,7 +196,7 @@ export const createStateContext = <
         }
 
         // Apply the action
-        const newState = action.apply(changedPayload, context, actionMeta);
+        const newState = action.apply(changedPayload as ActionPayload, context, actionMeta);
         setRoomGameState(roomId, newState);
 
         // afterHooks execution
@@ -195,7 +206,7 @@ export const createStateContext = <
             const enhancedMeta: Metadata = { ...actionMeta, hookId };
             // Apply the hook
             const newPayload = hook.hookApply<
-                unknown,
+                ActionPayload,
                 CustomState,
                 CustomGameOptions,
                 CustomZone,
@@ -223,34 +234,37 @@ export const createStateContext = <
             }
         }
 
-        const cardReactions = [];
+        const cardReactions: string[] = [];
 
         // Check for card reactions
         for (const zone of Object.values(newState.coreState.zones)) {
             for (const card of zone.cards) {
                 const actionReaction = card.templateFields.actions?.[actionName];
                 if (actionReaction) {
-                    actionReaction<unknown, CustomState, CustomGameOptions, CustomZone, CustomCard>(
-                        changedPayload,
-                        context,
-                        card.id
-                    );
+                    actionReaction<
+                        ActionPayload,
+                        CustomState,
+                        CustomGameOptions,
+                        CustomZone,
+                        CustomCard
+                    >(changedPayload as ActionPayload, context, card.id);
                     // Log the action to the history
                     cardReactions.push(card.id);
                 }
             }
         }
 
-        // Log the action to the history
         let finalState = { ...getState() };
-        if (actionName === actionTypes.APPEND_HISTORY) {
+        // If the action is APPEND_HISTORY, return the state without appending the action to the history
+        if (actionName === actionTypes.APPEND_HISTORY || actionName === actionTypes.END_GAME) {
             return finalState as GameState<CustomState, CustomGameOptions, CustomZone, CustomCard>;
         }
+        // Log the action to the history
         finalState.coreState.history.push({
             recordType: historyRecordsTypes.ACTION,
             actionName,
             payloadHistory,
-            originalPayload: payload,
+            originalPayload: payload as ExtendedPayload<ActionPayload>,
             payload: changedPayload,
             meta: actionMeta,
             cardReactions,
@@ -261,8 +275,13 @@ export const createStateContext = <
         // Check game end conditions
         const endGameResult = loadedConfig.endGameCondition(context);
         if (endGameResult) {
-            finalState = endGame.apply(endGameResult, context, meta);
-            finalState = loadedConfig.afterGameEnd(context, endGameResult);
+            finalState = endGameApply<CustomState, CustomGameOptions, CustomZone, CustomCard>(
+                endGameResult,
+                context,
+                meta
+            );
+            setRoomGameState(roomId, finalState);
+            finalState = loadedConfig.afterGameEnd(context, endGameResult, meta);
             setRoomGameState(roomId, finalState);
         }
 

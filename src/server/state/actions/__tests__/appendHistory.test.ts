@@ -1,5 +1,5 @@
 import appendHistory from '../appendHistory';
-import { HistoryRecord, StateContext } from '../../../types/gameState';
+import { HistoryRecord, StateContext } from '../../../types';
 import { getInitialGameState, getMeta } from '../testUtils';
 
 describe('appendHistory action', () => {
@@ -16,7 +16,7 @@ describe('appendHistory action', () => {
         const newRecord = {
             recordType: 'MOVE',
             payload: { a: 'sa' },
-            meta: { roomId: '', timestamp: Date.now() },
+            meta: { roomId: '', timestamp: new Date() },
         } as HistoryRecord<unknown>;
         const result = appendHistory.apply(
             newRecord,

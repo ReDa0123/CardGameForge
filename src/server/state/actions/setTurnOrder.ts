@@ -1,12 +1,17 @@
-import { ActionTemplate } from '../../types/gameConfig';
-import { TurnOrder } from '../../types/gameState';
+import { ActionTemplate, TurnOrder } from '../../types';
 import { actionTypes } from './actionTypes';
-import { changeStateValue } from './utils';
+import { assocByDotPath } from './utils';
 
-const setTurnOrder: ActionTemplate<TurnOrder> = {
+export type SetTurnOrderPayload = TurnOrder;
+
+/**
+ * Action to set the turn order in the game.
+ * Payload - The turn order object.
+ */
+const setTurnOrder: ActionTemplate<SetTurnOrderPayload> = {
     name: actionTypes.SET_TURN_ORDER,
     apply: (payload, ctx) => {
-        return changeStateValue(ctx.getState(), 'coreState.turnOrder', payload);
+        return assocByDotPath(ctx.getState(), 'coreState.turnOrder', payload);
     },
 };
 

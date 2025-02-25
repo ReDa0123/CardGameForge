@@ -1,8 +1,14 @@
 import { createStateContext } from './createStateContext';
-import { Metadata, MoveDefinition } from '../../types/gameState';
+import { Metadata, MoveDefinition } from '../../types';
 import { historyRecordsTypes } from '../../constants';
-import { actionTypes } from '../actions';
+import { actionTypes, AppendHistoryPayload, EndTurnPayload } from '../actions';
 
+/**
+ * Execute a move in the game state.
+ * @param move The move to execute
+ * @param payload The payload for the move
+ * @param meta Metadata for the move
+ */
 export const executeMove = <
     Payload,
     CustomState,
@@ -25,11 +31,8 @@ export const executeMove = <
         (move.allowedPhases === undefined || move.allowedPhases.includes(currentPhase)) &&
         canExecute
     ) {
-        move.execute(payload, context, meta);
-        didExecute = true;
-
         // Log the move
-        context.dispatchAction(
+        context.dispatchAction<AppendHistoryPayload>(
             actionTypes.APPEND_HISTORY,
             {
                 recordType: historyRecordsTypes.MOVE,
@@ -41,8 +44,12 @@ export const executeMove = <
             meta
         );
 
-        if (move.changeTurnAfter) {
-            context.dispatchAction(actionTypes.END_TURN, {}, meta);
+        // Execute the move
+        move.execute(payload, context, meta);
+        didExecute = true;
+
+        if (move.changeTurnAfter && context.getState().coreState.gameInProgress) {
+            context.dispatchAction<EndTurnPayload>(actionTypes.END_TURN, {}, meta);
         }
     }
 

@@ -1,4 +1,4 @@
-import { CardTemplate, Zone } from './gameObjects';
+import { Card, CardTemplate, Zone } from './gameObjects';
 import { ActionRegistry, MovesRegistry } from './registries';
 import { GameConfig } from './gameConfig';
 import { historyRecordsTypes } from '../constants';
@@ -50,7 +50,7 @@ export type GameState<
 export type Metadata = {
     playerId?: string;
     playerNickname?: string;
-    timestamp: number | Date;
+    timestamp: Date;
     moveId?: string;
     roomId: string;
     actionId?: string;
@@ -69,7 +69,8 @@ export type PayloadHistoryRecord<Payload> = {
 export type HistoryRecord<Payload> = {
     recordType: RecordType;
     actionName?: string;
-    payload?: ExtendedPayload<Payload>;
+    moveId?: string;
+    payload?: Payload;
     originalPayload?: ExtendedPayload<Payload>;
     payloadHistory?: PayloadHistoryRecord<Payload>[];
     meta: Metadata;
@@ -88,7 +89,7 @@ export type DispatchAction<
     CC extends Record<string, any>
 > = <ActionPayload>(
     actionName: string,
-    payload: ExtendedPayload<ActionPayload>,
+    payload: ActionPayload,
     meta: Metadata
 ) => GameState<CS, CGO, CZ, CC>;
 
@@ -130,7 +131,7 @@ export type AddHookOptions<
 > = {
     once?: boolean;
     removeCond?: <ActionPayload>(
-        payload: ExtendedPayload<ActionPayload>,
+        payload: ActionPayload,
         ctx: StateContext<CS, CGO, CZ, CC>,
         meta: Metadata
     ) => boolean;
@@ -162,6 +163,11 @@ export type StateContext<
     removeAfterHook: RemoveHookFn;
     exportHistory: (path: string, filename?: string) => void;
     loadedConfig: GameConfig<CS, CGO, CZ, CC>;
+    createCardFromTemplate: (
+        cardTemplate: CardTemplate<CC>,
+        displayProps?: Record<string, any>,
+        initialState?: Record<string, any>
+    ) => Card<CC>;
 };
 
 export type ActionApply<

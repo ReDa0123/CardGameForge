@@ -1,13 +1,16 @@
-import { ActionTemplate } from '../../types/gameConfig';
+import { ActionTemplate, Card } from '../../types';
 import { actionTypes } from './actionTypes';
-import { changeStateValue } from './utils';
-import { Card } from '../../types/gameObjects';
+import { assocByDotPath } from './utils';
 
-type AddToZonePayload = {
+export type AddToZonePayload = {
     cards: Card<Record<string, any>> | Card<Record<string, any>>[];
     toZoneId: string;
 };
 
+/**
+ * Action to add a card or cards to a zone.
+ * Payload - An object with the cards to add and the ID of the zone to add them to.
+ */
 const addToZone: ActionTemplate<AddToZonePayload> = {
     name: actionTypes.ADD_TO_ZONE,
     apply: (payload, ctx, meta) => {
@@ -16,12 +19,12 @@ const addToZone: ActionTemplate<AddToZonePayload> = {
         const state = ctx.getState();
         const toZone = state.coreState.zones[toZoneId];
         if (!toZone) {
-            if (ctx.loadedConfig?.logConnections) {
+            if (ctx.loadedConfig?.logErrors) {
                 console.error(`${meta.roomId}: Zone ${toZoneId} does not exist`);
             }
             return { ...state };
         }
-        return changeStateValue(state, `coreState.zones.${toZoneId}.cards`, [
+        return assocByDotPath(state, `coreState.zones.${toZoneId}.cards`, [
             ...toZone.cards,
             ...cards,
         ]);

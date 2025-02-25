@@ -15,6 +15,15 @@ export * from './utils';
 export * from './appendHistory';
 export * from './endGame';
 export * from './endTurn';
+export * from './setTurnOrder';
+export * from './changePhase';
+export * from './setTeams';
+export * from './changeZone';
+export * from './addToZone';
+export * from './removeFromZone';
+export * from './shuffleZone';
+export * from './changeCard';
+
 export const allLibActions = [
     appendHistory,
     endGame,

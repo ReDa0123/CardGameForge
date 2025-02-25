@@ -1,6 +1,12 @@
-import { ActionApply, ActionDefinition } from '../../types/gameState';
+import { ActionApply, ActionDefinition } from '../../types';
 import { getRoomActionRegistry } from './roomGameData';
 
+/**
+ * Create and register a new action for a room.
+ * @param roomId The ID of the room
+ * @param actionName The name of the action
+ * @param applyFn The function to apply the action
+ */
 export function createAction<
     ActionPayload,
     CS,

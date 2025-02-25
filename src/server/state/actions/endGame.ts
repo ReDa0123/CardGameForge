@@ -1,33 +1,50 @@
-import { EndGameResult, HistoryRecord } from '../../types/gameState';
-import { ActionTemplate } from '../../types/gameConfig';
+import { EndGameResult, HistoryRecord, ActionTemplate, StateContext, Metadata } from '../../types';
 import { actionTypes } from './actionTypes';
 import { historyRecordsTypes } from '../../constants';
 
-const endGame: ActionTemplate<EndGameResult> = {
+export type EndGamePayload = EndGameResult;
+
+export const endGameApply = <
+    CustomState = unknown,
+    CustomGameOptions = unknown,
+    CustomZone extends Record<string, any> = Record<string, any>,
+    CustomCard extends Record<string, any> = Record<string, any>
+>(
+    payload: EndGamePayload,
+    ctx: StateContext<CustomState, CustomGameOptions, CustomZone, CustomCard>,
+    meta: Metadata
+) => {
+    const state = ctx.getState();
+    return {
+        ...state,
+        coreState: {
+            ...state.coreState,
+            gameInProgress: false,
+            endResult: payload,
+            history: [
+                ...state.coreState.history,
+                {
+                    recordType: historyRecordsTypes.SYSTEM,
+                    message: 'Game ended',
+                    payload,
+                    actionName: actionTypes.END_GAME,
+                    meta: {
+                        ...meta,
+                        actionId: actionTypes.END_GAME,
+                    },
+                } as HistoryRecord<EndGamePayload>,
+            ],
+        },
+    };
+};
+
+/**
+ * Action to end the game.
+ * Payload - End game result.
+ */
+const endGame: ActionTemplate<EndGamePayload> = {
     name: actionTypes.END_GAME,
-    apply: (payload, ctx, meta) => {
-        const state = ctx.getState();
-        return {
-            ...state,
-            coreState: {
-                ...state.coreState,
-                gameInProgress: false,
-                endResult: payload,
-                history: [
-                    ...state.coreState.history,
-                    {
-                        recordType: historyRecordsTypes.SYSTEM,
-                        message: 'Game ended',
-                        payload,
-                        meta: {
-                            ...meta,
-                            actionId: actionTypes.END_GAME,
-                        },
-                    } as HistoryRecord<EndGameResult>,
-                ],
-            },
-        };
-    },
+    apply: endGameApply,
 };
 
 export default endGame;

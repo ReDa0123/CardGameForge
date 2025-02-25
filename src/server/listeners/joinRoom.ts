@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io';
-import { GameConfig } from '../types/gameConfig';
+import { GameConfig } from '../types';
 import { events } from '../../shared/constants/events';
 import { getNetworkState } from '../state';
 
@@ -19,6 +19,11 @@ const joinRoom =
         socket: Socket,
         gameConfig: GameConfig<CustomState, CustomGameOptions, CustomZone, CustomCard>
     ) =>
+    /**
+     * Join room listener.
+     * @param roomId The room id
+     * @param nickname The joining player's nickname
+     */
     ({ roomId, nickname }: JoinRoomArgs) => {
         // Check if the network id and nickname are valid
         if (!roomId || !nickname) {
@@ -27,7 +32,7 @@ const joinRoom =
         }
 
         // Log the connection
-        if (gameConfig.logConnections) {
+        if (gameConfig.logErrors) {
             console.log(
                 `${socket.id} is trying to join room ${roomId} with the nickname ${nickname}`
             );

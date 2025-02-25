@@ -5,7 +5,7 @@ export type Zone<CustomZone extends Record<string, any>> = {
     name: string;
     type?: string;
     owner?: string;
-    cards: Card<any>[]; // TODO: any?
+    cards: Card<any>[];
     custom?: CustomZone;
 };
 

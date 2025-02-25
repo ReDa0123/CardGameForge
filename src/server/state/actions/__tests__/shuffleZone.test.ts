@@ -1,8 +1,9 @@
 import shuffleZone from '../shuffleZone';
 import { getCard, getInitialGameState, getMeta } from '../testUtils';
-import { StateContext } from '../../../types/gameState';
+import { StateContext } from '../../../types';
 
 const zoneId = 'zone1';
+const zonePayload = { zoneId };
 const cards = [getCard('card1'), getCard('card2'), getCard('card3')];
 const initialState = getInitialGameState({
     zones: {
@@ -26,7 +27,7 @@ const ctxMock: Partial<StateContext<unknown, unknown, Record<string, any>, Recor
 describe('shuffleZone', () => {
     it('should shuffle the cards in a zone', () => {
         const result = shuffleZone.apply(
-            zoneId,
+            zonePayload,
             ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
             getMeta()
         );
@@ -43,8 +44,9 @@ describe('shuffleZone', () => {
         expect(result).toEqual(expectedState);
     });
     it('should return the same state if the zone does not exist', () => {
+        const payload = { zoneId: 'zone3' };
         const result = shuffleZone.apply(
-            'zone3',
+            payload,
             ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
             getMeta()
         );

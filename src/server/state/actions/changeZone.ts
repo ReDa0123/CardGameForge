@@ -1,6 +1,5 @@
-import { ActionTemplate } from '../../types/gameConfig';
+import { ActionTemplate, GameState } from '../../types';
 import { actionTypes } from './actionTypes';
-import { GameState } from '../../types/gameState';
 
 export type ChangeZonePayload = {
     cardId: string;
@@ -8,6 +7,10 @@ export type ChangeZonePayload = {
     toZoneId: string;
 };
 
+/**
+ * Action to change a card's zone.
+ * Payload - The ID of the card to change, the ID of the zone it's in, and the ID of the zone to move it to.
+ */
 const changeZone: ActionTemplate<ChangeZonePayload> = {
     name: actionTypes.CHANGE_ZONE,
     apply: (payload, ctx, meta) => {
@@ -16,14 +19,14 @@ const changeZone: ActionTemplate<ChangeZonePayload> = {
         //Check if fromZone and toZone exist
         const fromZone = state.coreState.zones[fromZoneId];
         if (!fromZone) {
-            if (ctx.loadedConfig?.logConnections) {
+            if (ctx.loadedConfig?.logErrors) {
                 console.error(`${meta.roomId}: Zone ${fromZoneId} does not exist`);
             }
             return { ...state };
         }
         const toZone = state.coreState.zones[toZoneId];
         if (!toZone) {
-            if (ctx.loadedConfig?.logConnections) {
+            if (ctx.loadedConfig?.logErrors) {
                 console.error(`${meta.roomId}: Zone ${toZoneId} does not exist`);
             }
             return { ...state };
@@ -32,7 +35,7 @@ const changeZone: ActionTemplate<ChangeZonePayload> = {
         const card = state.coreState.zones[fromZoneId].cards.find((c) => c.id === cardId);
         // Check if card exists in fromZone
         if (!card) {
-            if (ctx.loadedConfig?.logConnections) {
+            if (ctx.loadedConfig?.logErrors) {
                 console.error(
                     `${meta.roomId}: Card ${cardId} does not exist in zone ${fromZoneId}`
                 );

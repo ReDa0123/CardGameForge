@@ -1,5 +1,5 @@
 import endGame from '../endGame';
-import { EndGameResult, HistoryRecord, StateContext } from '../../../types/gameState';
+import { EndGameResult, HistoryRecord, StateContext } from '../../../types';
 import { getInitialGameState, getMeta } from '../testUtils';
 import { historyRecordsTypes } from '../../../constants';
 import { actionTypes } from '../actionTypes';
@@ -31,6 +31,7 @@ describe('endGame action', () => {
                     recordType: historyRecordsTypes.SYSTEM,
                     message: 'Game ended',
                     payload: endGameResult,
+                    actionName: actionTypes.END_GAME,
                     meta: { ...meta, actionId: actionTypes.END_GAME },
                 } as HistoryRecord<EndGameResult>,
             ],

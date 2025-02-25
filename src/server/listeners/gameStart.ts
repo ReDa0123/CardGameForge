@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io';
-import { GameConfig } from '../types/gameConfig';
+import { GameConfig } from '../types';
 import { getNetworkState } from '../state';
 import { events } from '../../shared/constants/events';
 import { prepareGameState } from '../state';
@@ -20,6 +20,11 @@ const gameStart =
         socket: Socket,
         gameConfig: GameConfig<CustomState, CustomGameOptions, CustomZone, CustomCard>
     ) =>
+    /**
+     * Game start listener.
+     * @param roomId The room id
+     * @param gameOptions Game options sent from the game lobby
+     */
     ({ roomId, gameOptions }: GameStartArgs<CustomGameOptions>) => {
         const roomNetworkState = getNetworkState(io, roomId);
 

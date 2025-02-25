@@ -1,5 +1,12 @@
-import { ActionDefinition, GameState, MoveDefinition } from '../../types/gameState';
-import { ActionRegistry, MovesRegistry } from '../../types/registries';
+import {
+    ActionDefinition,
+    GameState,
+    MoveDefinition,
+    ActionRegistry,
+    MovesRegistry,
+    Card,
+    CardTemplate,
+} from '../../types';
 
 export type RoomGameData<
     CS,
@@ -10,8 +17,16 @@ export type RoomGameData<
     gameState: GameState<CS, CGO, CZ, CC>;
     actionRegistry: ActionRegistry<CS, CGO, CZ, CC>;
     movesRegistry: MovesRegistry<CS, CGO, CZ, CC>;
+    createCardFromTemplate: (
+        cardTemplate: CardTemplate<CC>,
+        displayProps?: Record<string, any>,
+        initialState?: Record<string, any>
+    ) => Card<CC>;
 };
 
+/**
+ * A map of room IDs to their game data.
+ */
 const roomGameData: Record<string, RoomGameData<any, any, any, any>> = {};
 
 export function getRoomGameData<
@@ -47,7 +62,7 @@ export function setRoomGameState<
 
 /**
  * Create a new base set of data for a room, with blank or default
- * action/moves registries.
+ * action/moves registries and helper functions.
  */
 export function createBaseRoomGameData<
     CS,
@@ -124,10 +139,41 @@ export function createBaseRoomGameData<
         },
     };
 
+    const getCreateCardFromTemplate = (): ((
+        cardTemplate: CardTemplate<CC>,
+        displayProps?: Record<string, any>,
+        initialState?: Record<string, any>
+    ) => Card<CC>) => {
+        const idsCount: Record<string, number> = {};
+        return (
+            cardTemplate: CardTemplate<CC>,
+            displayProps?: Record<string, any>,
+            initialState?: Record<string, any>
+        ): Card<CC> => {
+            const id = cardTemplate.id;
+            const count = idsCount[id] ?? 0;
+            idsCount[id] = count + 1;
+            return {
+                id: `${id}_${count}`,
+                templateId: id,
+                templateFields: {
+                    name: cardTemplate.name,
+                    displayType: cardTemplate.displayType,
+                    moves: cardTemplate.moves,
+                    actions: cardTemplate.actions,
+                    custom: cardTemplate.custom,
+                },
+                state: initialState,
+                displayProps,
+            };
+        };
+    };
+
     const initData: RoomGameData<CS, CGO, CZ, CC> = {
         gameState: {} as GameState<CS, CGO, CZ, CC>,
         actionRegistry,
         movesRegistry,
+        createCardFromTemplate: getCreateCardFromTemplate(),
     };
 
     roomGameData[roomId] = initData;

@@ -1,11 +1,16 @@
 import { createServer } from 'http';
 import { Server, ServerOptions } from 'socket.io';
-import { GameConfig } from './types/gameConfig';
-import { SocketListener } from './types/socket';
+import { GameConfig, SocketListener } from './types';
 import { joinRoom, disconnectFromRoom, disconnect, gameStart, playMove } from './listeners';
 import { events } from '../shared/constants/events';
 import { setLoadedConfig } from './state';
 
+/**
+ * The main function to setup and run the game server.
+ * @param port The port to run the server on
+ * @param opts Options for the socket.io server
+ * @param gameConfig The game configuration
+ */
 const setupAndRunServer = <
     CustomState,
     CustomGameOptions,

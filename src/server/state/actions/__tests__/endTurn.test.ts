@@ -1,5 +1,5 @@
 import { getInitialGameState, getMeta } from '../testUtils';
-import { StateContext } from '../../../types/gameState';
+import { StateContext } from '../../../types';
 import endTurn from '../endTurn';
 
 describe('endTurn action', () => {
