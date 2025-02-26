@@ -1,21 +1,23 @@
-import {
-    GameState,
-    HistoryRecord,
-    Metadata,
-    NetworkState,
-    Card,
-    CardTemplate,
-    Zone,
-} from '../../types';
+import { GameState, HistoryRecord, Metadata, NetworkState, Card, Zone } from '../../types';
 
 export const getInitialGameState = (
     customValues: Partial<
-        GameState<unknown, unknown, Record<string, any>, Record<string, any>>['coreState']
+        GameState<
+            Record<string, any>,
+            Record<string, any>,
+            Record<string, any>,
+            Record<string, any>
+        >['coreState']
     > = {}
-): GameState<unknown, unknown, Record<string, any>, Record<string, any>> => {
+): GameState<
+    Record<string, any>,
+    Record<string, any>,
+    Record<string, any>,
+    Record<string, any>
+> => {
     return {
-        customState: {} as unknown,
-        gameOptions: {} as unknown,
+        customState: {},
+        gameOptions: {},
         networkState: {
             roomId: 'roomId',
             players: [] as { playerId: string; playerNickname: string }[],
@@ -31,9 +33,9 @@ export const getInitialGameState = (
                 activePlayerIndex: 0,
             },
             teams: null,
-            cardCollection: [] as CardTemplate<Record<string, any>>[],
+            cardCollection: [],
             zones: {} as {
-                [zoneId: string]: Zone<Record<string, any>>;
+                [zoneId: string]: Zone<Record<string, any>, Record<string, any>>;
             },
             history: [] as HistoryRecord<unknown>[],
             ...customValues,
@@ -46,7 +48,7 @@ export const getMeta = (): Metadata => ({
     timestamp: new Date(),
 });
 
-export const getCard = (id: string): Card<any> => ({
+export const getCard = (id: string): Card<Record<string, any>> => ({
     id,
     templateId: id,
     templateFields: {

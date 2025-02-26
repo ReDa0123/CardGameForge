@@ -54,7 +54,7 @@ const testZone2: ConfigZone<any> = {
     isPerPlayer: true,
 };
 
-const cardCollection: CardTemplate<any>[] = [
+const cardCollection: CardTemplate<Record<string, any>>[] = [
     {
         id: 'testCard',
         name: 'Test Card',

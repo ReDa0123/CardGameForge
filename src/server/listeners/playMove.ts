@@ -10,8 +10,8 @@ type PlayMoveArgs = {
 
 const playMove =
     <
-        CustomState,
-        CustomGameOptions,
+        CustomState extends Record<string, any>,
+        CustomGameOptions extends Record<string, any>,
         CustomZone extends Record<string, any>,
         CustomCard extends Record<string, any>
     >(
@@ -35,7 +35,9 @@ const playMove =
         }
 
         //Check if the game is in progress
-        const gameData = getRoomGameData(roomId);
+        const gameData = getRoomGameData<CustomState, CustomGameOptions, CustomZone, CustomCard>(
+            roomId
+        );
         const gameState = gameData?.gameState;
 
         if (!gameData || !gameState) {

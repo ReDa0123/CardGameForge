@@ -21,8 +21,8 @@ import { createStateContext } from './createStateContext';
  * @param gameOptions Optional game options
  */
 export const prepareGameState = <
-    CustomState,
-    CustomGameOptions,
+    CustomState extends Record<string, any>,
+    CustomGameOptions extends Record<string, any>,
     CustomZone extends Record<string, any>,
     CustomCard extends Record<string, any>
 >(
@@ -69,7 +69,7 @@ export const prepareGameState = <
     }
 
     // Prepare zones
-    const zones: { [zoneId: string]: Zone<CustomZone> } = {};
+    const zones: { [zoneId: string]: Zone<CustomZone, CustomCard> } = {};
     for (const zone of gameConfig.zones) {
         if (zone.isPerPlayer) {
             // Create a separate zone for each player

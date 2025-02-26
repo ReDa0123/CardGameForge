@@ -12,8 +12,8 @@ import { setLoadedConfig } from './state';
  * @param gameConfig The game configuration
  */
 const setupAndRunServer = <
-    CustomState,
-    CustomGameOptions,
+    CustomState extends Record<string, any>,
+    CustomGameOptions extends Record<string, any>,
     CustomZone extends Record<string, any>,
     CustomCard extends Record<string, any>
 >(

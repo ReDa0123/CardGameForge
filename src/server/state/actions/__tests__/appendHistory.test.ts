@@ -9,7 +9,12 @@ describe('appendHistory action', () => {
             history: [{ recordType: 'MOVE', payload: {}, meta }],
         });
         const ctxMock: Partial<
-            StateContext<unknown, unknown, Record<string, any>, Record<string, any>>
+            StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >
         > = {
             getState: jest.fn(() => initialState),
         };
@@ -20,7 +25,12 @@ describe('appendHistory action', () => {
         } as HistoryRecord<unknown>;
         const result = appendHistory.apply(
             newRecord,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             meta
         );
         const expectedState = getInitialGameState({

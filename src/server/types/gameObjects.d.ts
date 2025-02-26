@@ -1,11 +1,11 @@
-import { GameState, StateContext } from './gameState';
+import { Metadata, StateContext } from './gameState';
 
-export type Zone<CustomZone extends Record<string, any>> = {
+export type Zone<CustomZone extends Record<string, any>, CustomCard extends Record<string, any>> = {
     id: string;
     name: string;
     type?: string;
     owner?: string;
-    cards: Card<any>[];
+    cards: Card<CustomCard>[];
     custom?: CustomZone;
 };
 
@@ -15,38 +15,42 @@ export type CardTemplate<CC extends Record<string, any>> = {
     displayType: string;
     moves?: {
         [moveName: string]: {
-            canExecute?: <CS, CGO, CZ extends Record<string, any>, CC extends Record<string, any>>(
-                payload: unknown,
-                ctx: StateContext<CS, CGO, CZ, CC>,
-                cardId: string
+            canExecute?: (
+                payload: any,
+                ctx: StateContext<any, any, any, any>,
+                cardId: string,
+                meta: Metadata
             ) => boolean;
-            execute?: <CS, CGO, CZ extends Record<string, any>, CC extends Record<string, any>>(
-                payload: unknown,
-                ctx: StateContext<CS, CGO, CZ, CC>,
-                cardId: string
-            ) => GameState<CS, CGO, CZ, CC>;
+            execute?: (
+                payload: any,
+                ctx: StateContext<any, any, any, any>,
+                cardId: string,
+                meta: Metadata
+            ) => void;
         };
     };
     actions?: {
-        [actionType: string]: <
-            Payload,
-            CS,
-            CGO,
-            CZ extends Record<string, any>,
-            CC extends Record<string, any>
-        >(
-            payload: Payload,
-            ctx: StateContext<CS, CGO, CZ, CC>,
-            cardId: string
-        ) => GameState<CS, CGO, CZ, CC>;
+        [actionType: string]: (
+            payload: any,
+            ctx: StateContext<any, any, any, any>,
+            cardId: string,
+            meta: Metadata
+        ) => void;
     };
     custom?: CC;
 };
 
-export type Card<CC extends Record<string, any>> = {
+export type Card<
+    CustomCardTemplate extends Record<string, any>,
+    DisplayProps extends Record<string, any> = Record<string, any>,
+    CardState extends Record<string, any> = Record<string, any>
+> = {
     id: string;
     templateId: string;
-    templateFields: Pick<CardTemplate<CC>, 'name' | 'displayType' | 'moves' | 'actions' | 'custom'>;
-    state?: Record<string, any>;
-    displayProps?: Record<string, any>;
+    templateFields: Pick<
+        CardTemplate<CustomCardTemplate>,
+        'name' | 'displayType' | 'moves' | 'actions' | 'custom'
+    >;
+    state?: CardState;
+    displayProps?: DisplayProps;
 };

@@ -16,7 +16,9 @@ const initialState = getInitialGameState({
         },
     },
 });
-const ctxMock: Partial<StateContext<unknown, unknown, Record<string, any>, Record<string, any>>> = {
+const ctxMock: Partial<
+    StateContext<Record<string, any>, Record<string, any>, Record<string, any>, Record<string, any>>
+> = {
     getState: jest.fn(() => initialState),
 };
 
@@ -29,7 +31,12 @@ describe('changeZone action', () => {
         };
         const result = changeZone.apply(
             payload,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({
@@ -57,7 +64,12 @@ describe('changeZone action', () => {
         };
         const result = changeZone.apply(
             payload,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         expect(result.coreState.zones).toEqual(initialState.coreState.zones);
@@ -71,7 +83,12 @@ describe('changeZone action', () => {
         };
         const result = changeZone.apply(
             payload,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         expect(result.coreState.zones).toEqual(initialState.coreState.zones);
@@ -85,7 +102,12 @@ describe('changeZone action', () => {
         };
         const result = changeZone.apply(
             payload,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         expect(result.coreState.zones).toEqual(initialState.coreState.zones);

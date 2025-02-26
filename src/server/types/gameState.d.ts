@@ -24,8 +24,8 @@ export type TurnOrder = {
 export type Teams = { [teamId: string]: string[] };
 
 export type GameState<
-    CustomState,
-    CustomGameOptions,
+    CustomState extends Record<string, any>,
+    CustomGameOptions extends Record<string, any>,
     CustomZone extends Record<string, any>,
     CustomCard extends Record<string, any>
 > = {
@@ -37,7 +37,7 @@ export type GameState<
         teams: Teams | null;
         cardCollection: CardTemplate<CustomCard>[];
         zones: {
-            [zoneId: string]: Zone<CustomZone>;
+            [zoneId: string]: Zone<CustomZone, CustomCard>;
         };
         history: HistoryRecord<unknown>[];
         randomSeed?: string | number;
@@ -71,7 +71,7 @@ export type HistoryRecord<Payload> = {
     actionName?: string;
     moveId?: string;
     payload?: Payload;
-    originalPayload?: ExtendedPayload<Payload>;
+    originalPayload?: Payload;
     payloadHistory?: PayloadHistoryRecord<Payload>[];
     meta: Metadata;
     message?: string;
@@ -83,8 +83,8 @@ export type ExtendedPayload<ActionPayload> = ActionPayload & {
 };
 
 export type DispatchAction<
-    CS,
-    CGO,
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
     CZ extends Record<string, any>,
     CC extends Record<string, any>
 > = <ActionPayload>(
@@ -93,28 +93,16 @@ export type DispatchAction<
     meta: Metadata
 ) => GameState<CS, CGO, CZ, CC>;
 
-export type HookApply = <
-    ActionPayload,
-    CS,
-    CGO,
-    CZ extends Record<string, any>,
-    CC extends Record<string, any>
->(
-    payload: ExtendedPayload<ActionPayload>,
-    ctx: StateContext<CS, CGO, CZ, CC>,
-    meta: Metadata
-) => Partial<ExtendedPayload<ActionPayload>>;
-
 export type ActionHook<
     ActionPayload,
-    CS,
-    CGO,
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
     CZ extends Record<string, any>,
     CC extends Record<string, any>
 > = {
     id: string;
     actionName: string;
-    hookApply: HookApply;
+    hookApply: HookApply<ActionPayload, CS, CGO, CZ, CC>;
     once: boolean;
     removeCond?: (
         payload: ExtendedPayload<ActionPayload>,
@@ -123,32 +111,50 @@ export type ActionHook<
     ) => boolean;
 };
 
+export type AddHookFn<
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
+    CZ extends Record<string, any>,
+    CC extends Record<string, any>
+> = <ActionPayload>(
+    actionName: string,
+    hookId: string,
+    hookApply: HookApply<ActionPayload, CS, CGO, CZ, CC>,
+    options?: AddHookOptions<ActionPayload, CS, CGO, CZ, CC>
+) => void;
+
+export type HookApply<
+    ActionPayload,
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
+    CZ extends Record<string, any>,
+    CC extends Record<string, any>
+> = (
+    payload: ExtendedPayload<ActionPayload>,
+    ctx: StateContext<CS, CGO, CZ, CC>,
+    meta: Metadata
+) => Partial<ExtendedPayload<ActionPayload>>;
+
 export type AddHookOptions<
-    CS,
-    CGO,
+    Payload,
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
     CZ extends Record<string, any>,
     CC extends Record<string, any>
 > = {
     once?: boolean;
-    removeCond?: <ActionPayload>(
-        payload: ActionPayload,
+    removeCond?: (
+        payload: ExtendedPayload<Payload>,
         ctx: StateContext<CS, CGO, CZ, CC>,
         meta: Metadata
     ) => boolean;
 };
 
-export type AddHookFn<CS, CGO, CZ extends Record<string, any>, CC extends Record<string, any>> = (
-    actionName: string,
-    hookId: string,
-    hookApply: HookApply,
-    options?: AddHookOptions<CS, CGO, CZ, CC>
-) => void;
-
 export type RemoveHookFn = (hookId: string, actionName: string) => void;
 
 export type StateContext<
-    CS,
-    CGO,
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
     CZ extends Record<string, any>,
     CC extends Record<string, any>
 > = {
@@ -163,17 +169,20 @@ export type StateContext<
     removeAfterHook: RemoveHookFn;
     exportHistory: (path: string, filename?: string) => void;
     loadedConfig: GameConfig<CS, CGO, CZ, CC>;
-    createCardFromTemplate: (
+    createCardFromTemplate: <
+        DisplayProps extends Record<string, any> = Record<string, any>,
+        CardState extends Record<string, any> = Record<string, any>
+    >(
         cardTemplate: CardTemplate<CC>,
-        displayProps?: Record<string, any>,
-        initialState?: Record<string, any>
-    ) => Card<CC>;
+        displayProps?: DisplayProps,
+        initialState?: CardState
+    ) => Card<CC, DisplayProps, CardState>;
 };
 
 export type ActionApply<
     ActionPayload,
-    CS,
-    CGO,
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
     CZ extends Record<string, any>,
     CC extends Record<string, any>
 > = (
@@ -184,8 +193,8 @@ export type ActionApply<
 
 export type ActionDefinition<
     ActionPayload,
-    CS,
-    CGO,
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
     CZ extends Record<string, any>,
     CC extends Record<string, any>
 > = {
@@ -197,8 +206,8 @@ export type ActionDefinition<
 
 export type MoveDefinition<
     Payload,
-    CS,
-    CGO,
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
     CZ extends Record<string, any>,
     CC extends Record<string, any>
 > = {
@@ -206,7 +215,8 @@ export type MoveDefinition<
     allowedPhases?: string[];
     canExecute?: (
         payload: Payload,
-        ctx: StateContext<CS, CGO, CZ, CC>
+        ctx: StateContext<CS, CGO, CZ, CC>,
+        meta: Metadata
     ) => { canExecute: boolean; reason?: string };
     execute: (payload: Payload, ctx: StateContext<CS, CGO, CZ, CC>, meta: Metadata) => void;
     message: (payload: Payload, ctx: StateContext<CS, CGO, CZ, CC>, meta: Metadata) => string;

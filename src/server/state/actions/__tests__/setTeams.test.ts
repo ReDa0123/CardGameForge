@@ -6,7 +6,12 @@ describe('setTeams action', () => {
     it('should set the teams when teams are null', () => {
         const initialState = getInitialGameState();
         const ctxMock: Partial<
-            StateContext<unknown, unknown, Record<string, any>, Record<string, any>>
+            StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >
         > = {
             getState: jest.fn(() => initialState),
         };
@@ -17,7 +22,12 @@ describe('setTeams action', () => {
 
         const result = setTeams.apply(
             newTeams,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({
@@ -34,7 +44,12 @@ describe('setTeams action', () => {
             },
         });
         const ctxMock: Partial<
-            StateContext<unknown, unknown, Record<string, any>, Record<string, any>>
+            StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >
         > = {
             getState: jest.fn(() => initialState),
         };
@@ -45,7 +60,12 @@ describe('setTeams action', () => {
 
         const result = setTeams.apply(
             newTeams,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({

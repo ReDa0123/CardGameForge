@@ -2,7 +2,7 @@ import changePhase from '../changePhase';
 import { getInitialGameState, getMeta } from '../testUtils';
 import { GameConfig, StateContext } from '../../../types';
 
-const getInitialState = () => getInitialGameState({ phase: 'first' });
+const initialState = getInitialGameState({ phase: 'first' });
 const mockLoadedConfig: Partial<GameConfig<any, any, Record<string, any>, Record<string, any>>> = {
     phases: {
         first: 'first',
@@ -10,11 +10,13 @@ const mockLoadedConfig: Partial<GameConfig<any, any, Record<string, any>, Record
     },
 };
 
-const ctxMock: Partial<StateContext<unknown, unknown, Record<string, any>, Record<string, any>>> = {
-    getState: jest.fn(getInitialState),
+const ctxMock: Partial<
+    StateContext<Record<string, any>, Record<string, any>, Record<string, any>, Record<string, any>>
+> = {
+    getState: jest.fn(() => initialState),
     loadedConfig: mockLoadedConfig as GameConfig<
-        unknown,
-        unknown,
+        Record<string, any>,
+        Record<string, any>,
         Record<string, any>,
         Record<string, any>
     >,
@@ -25,7 +27,12 @@ describe('changePhase action', () => {
         const newPhase = { phase: 'second' };
         const result = changePhase.apply(
             newPhase,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({
@@ -39,7 +46,12 @@ describe('changePhase action', () => {
         const newPhase = { phase: '' };
         const result = changePhase.apply(
             newPhase,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({
@@ -53,10 +65,15 @@ describe('changePhase action', () => {
         const newPhase = { phase: 'third' };
         const result = changePhase.apply(
             newPhase,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
-        expect(result).toEqual(getInitialState());
+        expect(result).toEqual(initialState);
     });
 
     it('should return the same state if the next phase is not found', () => {
@@ -64,7 +81,12 @@ describe('changePhase action', () => {
         const newPhase = { phase: '' };
         const result = changePhase.apply(
             newPhase,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         expect(result).toEqual(initialState);

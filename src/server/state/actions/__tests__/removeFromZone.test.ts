@@ -14,7 +14,12 @@ describe('removeFromZone action', () => {
             },
         });
         const ctxMock: Partial<
-            StateContext<unknown, unknown, Record<string, any>, Record<string, any>>
+            StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >
         > = {
             getState: jest.fn(() => initialState),
         };
@@ -23,7 +28,12 @@ describe('removeFromZone action', () => {
                 cardIds: 'card1',
                 fromZoneId: 'zone1',
             },
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({
@@ -49,7 +59,12 @@ describe('removeFromZone action', () => {
             },
         });
         const ctxMock: Partial<
-            StateContext<unknown, unknown, Record<string, any>, Record<string, any>>
+            StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >
         > = {
             getState: jest.fn(() => initialState),
         };
@@ -58,7 +73,12 @@ describe('removeFromZone action', () => {
                 cardIds: ['card1', 'card2'],
                 fromZoneId: 'zone1',
             },
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({
@@ -84,7 +104,12 @@ describe('removeFromZone action', () => {
             },
         });
         const ctxMock: Partial<
-            StateContext<unknown, unknown, Record<string, any>, Record<string, any>>
+            StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >
         > = {
             getState: jest.fn(() => initialState),
         };
@@ -93,7 +118,12 @@ describe('removeFromZone action', () => {
                 cardIds: ['card1', 'card3'],
                 fromZoneId: 'zone1',
             },
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({
@@ -119,7 +149,12 @@ describe('removeFromZone action', () => {
             },
         });
         const ctxMock: Partial<
-            StateContext<unknown, unknown, Record<string, any>, Record<string, any>>
+            StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >
         > = {
             getState: jest.fn(() => initialState),
         };
@@ -128,7 +163,12 @@ describe('removeFromZone action', () => {
                 cardIds: 'card3',
                 fromZoneId: 'zone1',
             },
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({
@@ -154,7 +194,12 @@ describe('removeFromZone action', () => {
             },
         });
         const ctxMock: Partial<
-            StateContext<unknown, unknown, Record<string, any>, Record<string, any>>
+            StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >
         > = {
             getState: jest.fn(() => initialState),
         };
@@ -163,7 +208,12 @@ describe('removeFromZone action', () => {
                 cardIds: 'card1',
                 fromZoneId: 'zone2',
             },
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         expect(result.coreState.zones.zone1.cards).toEqual([getCard('card1'), getCard('card2')]);

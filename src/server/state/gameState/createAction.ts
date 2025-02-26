@@ -9,8 +9,8 @@ import { getRoomActionRegistry } from './roomGameData';
  */
 export function createAction<
     ActionPayload,
-    CS,
-    CGO,
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
     CZ extends Record<string, any>,
     CC extends Record<string, any>
 >(roomId: string, actionName: string, applyFn: ActionApply<ActionPayload, CS, CGO, CZ, CC>): void {

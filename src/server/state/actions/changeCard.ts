@@ -4,7 +4,7 @@ import { actionTypes } from './actionTypes';
 export type ChangeCardPayload = {
     cardId: string;
     zoneId: string;
-    cardChanges: Partial<Card<any>>;
+    cardChanges: Partial<Card<Record<string, any>>>;
 };
 
 /**

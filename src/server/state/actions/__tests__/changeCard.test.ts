@@ -12,7 +12,9 @@ const initialState = getInitialGameState({
     },
 });
 
-const ctxMock: Partial<StateContext<unknown, unknown, Record<string, any>, Record<string, any>>> = {
+const ctxMock: Partial<
+    StateContext<Record<string, any>, Record<string, any>, Record<string, any>, Record<string, any>>
+> = {
     getState: jest.fn(() => initialState),
 };
 
@@ -26,7 +28,12 @@ describe('changeCard action', () => {
         };
         const result = changeCard.apply(
             payload,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({
@@ -50,7 +57,12 @@ describe('changeCard action', () => {
         };
         const result = changeCard.apply(
             payload,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({
@@ -74,7 +86,12 @@ describe('changeCard action', () => {
         };
         const result = changeCard.apply(
             payload,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
 
@@ -89,7 +106,12 @@ describe('changeCard action', () => {
         };
         const result = changeCard.apply(
             payload,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
 

@@ -6,7 +6,12 @@ describe('setTurnOrder action', () => {
     it('should set a turn order at state.coreState.turnOrder', () => {
         const initialState = getInitialGameState();
         const ctxMock: Partial<
-            StateContext<unknown, unknown, Record<string, any>, Record<string, any>>
+            StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >
         > = {
             getState: jest.fn(() => initialState),
         };
@@ -18,7 +23,12 @@ describe('setTurnOrder action', () => {
         };
         const result = setTurnOrder.apply(
             newTurnOrder,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({

@@ -79,8 +79,8 @@ const getExportHistory =
  * @param roomId
  */
 export const createStateContext = <
-    CustomState,
-    CustomGameOptions,
+    CustomState extends Record<string, any>,
+    CustomGameOptions extends Record<string, any>,
     CustomZone extends Record<string, any>,
     CustomCard extends Record<string, any>
 >(
@@ -130,12 +130,12 @@ export const createStateContext = <
         meta: Metadata
     ): GameState<CustomState, CustomGameOptions, CustomZone, CustomCard> => {
         // Get the action from the registry
-        const action = gameData.actionRegistry.getAction(actionName);
+        const action = gameData.actionRegistry.getAction<ActionPayload>(actionName);
         if (!action) {
             if (loadedConfig.logErrors) {
                 console.error(`Action ${actionName} not found`);
-                return getState();
             }
+            return getState();
         }
 
         // Check that payload is an object
@@ -166,13 +166,7 @@ export const createStateContext = <
             // Create a metadata object for the hook
             const enhancedMeta: Metadata = { ...actionMeta, hookId };
             // Apply the hook
-            const newPayload = hook.hookApply<
-                ActionPayload,
-                CustomState,
-                CustomGameOptions,
-                CustomZone,
-                CustomCard
-            >(changedPayload, context, enhancedMeta);
+            const newPayload = hook.hookApply(changedPayload, context, enhancedMeta);
             changedPayload = { ...changedPayload, ...newPayload };
 
             // Check if the hook should be removed
@@ -205,13 +199,7 @@ export const createStateContext = <
             // Create a metadata object for the hook
             const enhancedMeta: Metadata = { ...actionMeta, hookId };
             // Apply the hook
-            const newPayload = hook.hookApply<
-                ActionPayload,
-                CustomState,
-                CustomGameOptions,
-                CustomZone,
-                CustomCard
-            >(changedPayload, context, enhancedMeta);
+            const newPayload = hook.hookApply(changedPayload, context, enhancedMeta);
             changedPayload = { ...changedPayload, ...newPayload };
 
             // Check if the hook should be removed
@@ -239,15 +227,13 @@ export const createStateContext = <
         // Check for card reactions
         for (const zone of Object.values(newState.coreState.zones)) {
             for (const card of zone.cards) {
-                const actionReaction = card.templateFields.actions?.[actionName];
+                const actions = card.templateFields.actions;
+                if (!actions) {
+                    continue;
+                }
+                const actionReaction = actions[actionName];
                 if (actionReaction) {
-                    actionReaction<
-                        ActionPayload,
-                        CustomState,
-                        CustomGameOptions,
-                        CustomZone,
-                        CustomCard
-                    >(changedPayload as ActionPayload, context, card.id);
+                    actionReaction(changedPayload, context, card.id, actionMeta);
                     // Log the action to the history
                     cardReactions.push(card.id);
                 }

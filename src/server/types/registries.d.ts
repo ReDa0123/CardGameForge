@@ -1,8 +1,8 @@
 import { ActionDefinition, AddHookFn, MoveDefinition, RemoveHookFn } from './gameState';
 
 export type ActionRegistry<
-    CS,
-    CGO,
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
     CZ extends Record<string, any>,
     CC extends Record<string, any>
 > = {
@@ -11,7 +11,7 @@ export type ActionRegistry<
     };
     addAction: <T>(action: ActionDefinition<T, CS, CGO, CZ, CC>) => void;
     removeAction: (actionName: string) => void;
-    getAction: <T>(actionName: string) => ActionDefinition<T, CS, CGO, CZ, CC>;
+    getAction: <T>(actionName: string) => ActionDefinition<T, CS, CGO, CZ, CC> | undefined;
     addBeforeHook: AddHookFn<CS, CGO, CZ, CC>;
     removeBeforeHook: RemoveHookFn;
     addAfterHook: AddHookFn<CS, CGO, CZ, CC>;
@@ -19,8 +19,8 @@ export type ActionRegistry<
 };
 
 export type MovesRegistry<
-    CS,
-    CGO,
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
     CZ extends Record<string, any>,
     CC extends Record<string, any>
 > = {

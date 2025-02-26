@@ -17,9 +17,11 @@ const initialState = getInitialGameState({
 
 const mockShuffledCards = [getCard('card3'), getCard('card1'), getCard('card2')];
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const randomizeMock = <T>(arr: T[]): T[] => mockShuffledCards as T[];
+const randomizeMock = <T>(_: T[]): T[] => mockShuffledCards as T[];
 
-const ctxMock: Partial<StateContext<unknown, unknown, Record<string, any>, Record<string, any>>> = {
+const ctxMock: Partial<
+    StateContext<Record<string, any>, Record<string, any>, Record<string, any>, Record<string, any>>
+> = {
     getState: jest.fn(() => initialState),
     randomize: jest.fn(randomizeMock) as <T>(arr: T[]) => T[],
 };
@@ -28,7 +30,12 @@ describe('shuffleZone', () => {
     it('should shuffle the cards in a zone', () => {
         const result = shuffleZone.apply(
             zonePayload,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({
@@ -47,7 +54,12 @@ describe('shuffleZone', () => {
         const payload = { zoneId: 'zone3' };
         const result = shuffleZone.apply(
             payload,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         expect(result.coreState.zones[zoneId].cards).toEqual(cards);

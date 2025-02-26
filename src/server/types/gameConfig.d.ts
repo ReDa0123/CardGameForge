@@ -14,15 +14,15 @@ export type PhaseDefinition = {
 };
 
 export type EndGameCondition<
-    CS,
-    CGO,
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
     CZ extends Record<string, any>,
     CC extends Record<string, any>
 > = (ctx: StateContext<CS, CGO, CZ, CC>) => EndGameResult | null;
 
 export type AfterGameEndFn<
-    CS,
-    CGO,
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
     CZ extends Record<string, any>,
     CC extends Record<string, any>
 > = (
@@ -31,10 +31,12 @@ export type AfterGameEndFn<
     meta: Metadata
 ) => GameState<CS, CGO, CZ, CC>;
 
-export type GameSetupFn<CS, CGO, CZ extends Record<string, any>, CC extends Record<string, any>> = (
-    ctx: StateContext<CS, CGO, CZ, CC>,
-    meta: Metadata
-) => GameState<CS, CGO, CZ, CC>;
+export type GameSetupFn<
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
+    CZ extends Record<string, any>,
+    CC extends Record<string, any>
+> = (ctx: StateContext<CS, CGO, CZ, CC>, meta: Metadata) => GameState<CS, CGO, CZ, CC>;
 
 export type ConfigZone<CZ extends Record<string, any>> = {
     zoneId: string;
@@ -45,15 +47,15 @@ export type ConfigZone<CZ extends Record<string, any>> = {
 
 export type ActionTemplate<
     ActionPayload = unknown,
-    CS = any,
-    CGO = any,
+    CS extends Record<string, any> = any,
+    CGO extends Record<string, any> = any,
     CZ extends Record<string, any> = Record<string, any>,
     CC extends Record<string, any> = Record<string, any>
 > = Pick<ActionDefinition<ActionPayload, CS, CGO, CZ, CC>, 'name' | 'apply'>;
 
 export type GameConfig<
-    CustomState,
-    CustomGameOptions,
+    CustomState extends Record<string, any>,
+    CustomGameOptions extends Record<string, any>,
     CustomZone extends Record<string, any>,
     CustomCard extends Record<string, any>
 > = {
@@ -61,8 +63,8 @@ export type GameConfig<
     minPlayers: number;
     maxPlayers: number;
     customState?: CustomState;
-    moves: MoveDefinition<unknown, CustomState, CustomGameOptions, CustomZone, CustomCard>[];
-    actions: ActionTemplate<unknown, CustomState, CustomGameOptions, CustomZone, CustomCard>[];
+    moves: MoveDefinition<any, CustomState, CustomGameOptions, CustomZone, CustomCard>[];
+    actions: ActionTemplate<any, CustomState, CustomGameOptions, CustomZone, CustomCard>[];
     randomSeed?: string | number;
     playOrder?: (
         ctx: StateContext<CustomState, CustomGameOptions, CustomZone, CustomCard>

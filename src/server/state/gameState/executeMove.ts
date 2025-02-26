@@ -11,8 +11,8 @@ import { actionTypes, AppendHistoryPayload, EndTurnPayload } from '../actions';
  */
 export const executeMove = <
     Payload,
-    CustomState,
-    CustomGameOptions,
+    CustomState extends Record<string, any>,
+    CustomGameOptions extends Record<string, any>,
     CustomZone extends Record<string, any>,
     CustomCard extends Record<string, any>
 >(
@@ -26,11 +26,13 @@ export const executeMove = <
     );
     const currentPhase = context.getState().coreState.phase;
     let didExecute = false;
-    const { canExecute, reason } = move?.canExecute?.(payload, context) ?? { canExecute: true };
-    if (
-        (move.allowedPhases === undefined || move.allowedPhases.includes(currentPhase)) &&
-        canExecute
-    ) {
+    const { canExecute, reason } = move?.canExecute?.(payload, context, meta) ?? {
+        canExecute: true,
+    };
+    let finalReason = reason;
+    if (move.allowedPhases !== undefined && !move.allowedPhases.includes(currentPhase)) {
+        finalReason = `Move ${move.name} not allowed in phase ${currentPhase}`;
+    } else if (canExecute) {
         // Log the move
         context.dispatchAction<AppendHistoryPayload>(
             actionTypes.APPEND_HISTORY,
@@ -53,5 +55,5 @@ export const executeMove = <
         }
     }
 
-    return { didExecute, newState: context.getState(), reason };
+    return { didExecute, newState: context.getState(), reason: finalReason };
 };

@@ -6,13 +6,23 @@ describe('endTurn action', () => {
     it('should set the next player as the active player when active player is not the last one', () => {
         const initialState = getInitialGameState();
         const ctxMock: Partial<
-            StateContext<unknown, unknown, Record<string, any>, Record<string, any>>
+            StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >
         > = {
             getState: jest.fn(() => initialState),
         };
         const result = endTurn.apply(
             {},
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({
@@ -38,13 +48,23 @@ describe('endTurn action', () => {
             },
         });
         const ctxMock: Partial<
-            StateContext<unknown, unknown, Record<string, any>, Record<string, any>>
+            StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >
         > = {
             getState: jest.fn(() => initialState),
         };
         const result = endTurn.apply(
             {},
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({
@@ -70,13 +90,23 @@ describe('endTurn action', () => {
             },
         });
         const ctxMock: Partial<
-            StateContext<unknown, unknown, Record<string, any>, Record<string, any>>
+            StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >
         > = {
             getState: jest.fn(() => initialState),
         };
         const result = endTurn.apply(
             {},
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({
@@ -102,13 +132,23 @@ describe('endTurn action', () => {
             },
         });
         const ctxMock: Partial<
-            StateContext<unknown, unknown, Record<string, any>, Record<string, any>>
+            StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >
         > = {
             getState: jest.fn(() => initialState),
         };
         const result = endTurn.apply(
             {},
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             getMeta()
         );
         const expectedState = getInitialGameState({

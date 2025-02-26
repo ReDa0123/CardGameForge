@@ -8,7 +8,12 @@ describe('endGame action', () => {
     it('should end the game and set endResult', () => {
         const initialState = getInitialGameState({ gameInProgress: true, endResult: null });
         const ctxMock: Partial<
-            StateContext<unknown, unknown, Record<string, any>, Record<string, any>>
+            StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >
         > = {
             getState: jest.fn(() => initialState),
         };
@@ -20,7 +25,12 @@ describe('endGame action', () => {
         const meta = getMeta();
         const result = endGame.apply(
             endGameResult,
-            ctxMock as StateContext<unknown, unknown, Record<string, any>, Record<string, any>>,
+            ctxMock as StateContext<
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>,
+                Record<string, any>
+            >,
             meta
         );
         const expectedState = getInitialGameState({

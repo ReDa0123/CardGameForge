@@ -5,8 +5,8 @@ import { historyRecordsTypes } from '../../constants';
 export type EndGamePayload = EndGameResult;
 
 export const endGameApply = <
-    CustomState = unknown,
-    CustomGameOptions = unknown,
+    CustomState extends Record<string, any> = Record<string, any>,
+    CustomGameOptions extends Record<string, any> = Record<string, any>,
     CustomZone extends Record<string, any> = Record<string, any>,
     CustomCard extends Record<string, any> = Record<string, any>
 >(
