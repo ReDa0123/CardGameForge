@@ -38,7 +38,7 @@ const setupAndRunServer = <
 
         socket.on(events.rooms.GAME_START, withSocketGameContext(gameStart));
 
-        socket.on(events.PLAY_TURN, withSocketGameContext(playMove));
+        socket.on(events.PLAY_MOVE, withSocketGameContext(playMove));
 
         socket.on(events.DISCONNECT, withSocketGameContext(disconnect));
     });

@@ -7,11 +7,11 @@ import {
     GameConfig,
     HistoryRecord,
     NetworkState,
-    TurnOrder,
     Zone,
     Metadata,
 } from '../../types';
 import { createStateContext } from './createStateContext';
+import { TurnOrder } from '../../../shared/types/gameState';
 
 /**
  * Prepare the initial game state for a room.

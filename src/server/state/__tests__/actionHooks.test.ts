@@ -2,7 +2,6 @@ import {
     ActionTemplate,
     CardTemplate,
     ConfigZone,
-    EndGameResult,
     GameConfig,
     MoveDefinition,
     NetworkState,
@@ -16,6 +15,7 @@ import {
     setLoadedConfig,
 } from '../gameState';
 import { expect } from '@jest/globals';
+import { EndGameResult } from '../../../shared/types/gameState';
 
 const PERMANENT_HOOK = 'permanentHook';
 const ONCE_HOOK = 'onceHook';

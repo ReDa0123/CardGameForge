@@ -41,14 +41,14 @@ const disconnectFromRoom =
         });
 
         // Send the updated network state to all clients in the room
-        if (networkState) {
+        const roomData = getRoomGameData<CustomState, CustomGameOptions, CustomZone, CustomCard>(
+            roomId
+        );
+        if (networkState && !roomData) {
             io.to(roomId).emit(events.rooms.ROOM_STATE_CHANGED, networkState);
         }
 
         // Remove the game data if it exists
-        const roomData = getRoomGameData<CustomState, CustomGameOptions, CustomZone, CustomCard>(
-            roomId
-        );
         if (roomData) {
             const otherPlayersInRoom = io.sockets.adapter.rooms.get(roomId);
             if (otherPlayersInRoom) {
@@ -58,8 +58,15 @@ const disconnectFromRoom =
                     otherPlayer.nickname = undefined;
                 }
             }
-            //TODO: on client remember to set network state to default after receiving this event
             removeRoomGameData(roomId);
+
+            if (networkState) {
+                io.to(roomId).emit(events.rooms.ROOM_STATE_CHANGED, {
+                    roomId: null,
+                    players: [],
+                    playerNickname: null,
+                });
+            }
         }
     };
 

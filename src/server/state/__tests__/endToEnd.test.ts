@@ -9,7 +9,6 @@ import {
     ActionTemplate,
     CardTemplate,
     ConfigZone,
-    EndGameResult,
     GameConfig,
     HistoryRecord,
     MoveDefinition,
@@ -19,6 +18,7 @@ import { actionTypes, allLibActions } from '../actions';
 import { expect } from '@jest/globals';
 import { AddToZonePayload, ChangePhasePayload } from '../actions';
 import { historyRecordsTypes } from '../../constants';
+import { EndGameResult } from '../../../shared/types/gameState';
 
 // Test data setup
 const roomId = 'testRoom';

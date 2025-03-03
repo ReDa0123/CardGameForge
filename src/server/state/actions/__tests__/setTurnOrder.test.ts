@@ -1,6 +1,7 @@
 import setTurnOrder from '../setTurnOrder';
-import { TurnOrder, StateContext } from '../../../types';
+import { StateContext } from '../../../types';
 import { getInitialGameState, getMeta } from '../testUtils';
+import { TurnOrder } from '../../../../shared/types/gameState';
 
 describe('setTurnOrder action', () => {
     it('should set a turn order at state.coreState.turnOrder', () => {

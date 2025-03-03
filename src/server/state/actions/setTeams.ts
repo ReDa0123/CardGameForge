@@ -1,6 +1,7 @@
-import { ActionTemplate, Teams } from '../../types';
+import { ActionTemplate } from '../../types';
 import { actionTypes } from './actionTypes';
 import { assocByDotPath } from './utils';
+import { Teams } from '../../../shared/types/gameState';
 
 export type SetTeamsPayload = Teams;
 

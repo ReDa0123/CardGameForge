@@ -185,7 +185,16 @@ export const createStateContext = <
 
             //Check if it should abort the action
             if (newPayload.ABORT) {
-                return getState();
+                const state = getState();
+                state.coreState.history.push({
+                    recordType: historyRecordsTypes.ACTION,
+                    actionName,
+                    payloadHistory,
+                    originalPayload: payload as ExtendedPayload<ActionPayload>,
+                    payload: changedPayload,
+                    meta: actionMeta,
+                });
+                return state;
             }
         }
 
@@ -218,7 +227,16 @@ export const createStateContext = <
 
             //Check if it should abort the action
             if (newPayload.ABORT) {
-                return getState();
+                const state = getState();
+                state.coreState.history.push({
+                    recordType: historyRecordsTypes.ACTION,
+                    actionName,
+                    payloadHistory,
+                    originalPayload: payload as ExtendedPayload<ActionPayload>,
+                    payload: changedPayload,
+                    meta: actionMeta,
+                });
+                return state;
             }
         }
 

@@ -3,11 +3,7 @@ import { GameConfig } from '../types';
 import { getNetworkState } from '../state';
 import { events } from '../../shared/constants/events';
 import { prepareGameState } from '../state';
-
-type GameStartArgs<CustomGameOptions> = {
-    roomId: string;
-    gameOptions?: CustomGameOptions;
-};
+import { GameStartArgs } from '../../shared/types/events';
 
 const gameStart =
     <
@@ -22,10 +18,10 @@ const gameStart =
     ) =>
     /**
      * Game start listener.
-     * @param roomId The room id
      * @param gameOptions Game options sent from the game lobby
      */
-    ({ roomId, gameOptions }: GameStartArgs<CustomGameOptions>) => {
+    ({ gameOptions }: GameStartArgs<CustomGameOptions>) => {
+        const roomId = socket.roomId!;
         const roomNetworkState = getNetworkState(io, roomId);
 
         if (!roomNetworkState) {
@@ -52,7 +48,7 @@ const gameStart =
             gameOptions
         );
 
-        io.to(roomId).emit(events.rooms.GAME_STARTED, gameState);
+        io.to(roomId).emit(events.GAME_STATE_CHANGED, gameState);
     };
 
 export default gameStart;

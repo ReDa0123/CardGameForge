@@ -2,11 +2,7 @@ import { Server, Socket } from 'socket.io';
 import { GameConfig, Metadata, MoveDefinition } from '../types';
 import { getRoomGameData, getNetworkState, executeMove } from '../state';
 import { events } from '../../shared/constants/events';
-
-type PlayMoveArgs = {
-    moveName: string;
-    payload: unknown;
-};
+import { PlayMoveArgs } from '../../shared/types/events';
 
 const playMove =
     <

@@ -1,6 +1,7 @@
 import setTeams from '../setTeams';
 import { getInitialGameState, getMeta } from '../testUtils';
-import { StateContext, Teams } from '../../../types';
+import { StateContext } from '../../../types';
+import { Teams } from '../../../../shared/types/gameState';
 
 describe('setTeams action', () => {
     it('should set the teams when teams are null', () => {

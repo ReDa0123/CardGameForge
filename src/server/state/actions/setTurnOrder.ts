@@ -1,6 +1,7 @@
-import { ActionTemplate, TurnOrder } from '../../types';
+import { ActionTemplate } from '../../types';
 import { actionTypes } from './actionTypes';
 import { assocByDotPath } from './utils';
+import { TurnOrder } from '../../../shared/types/gameState';
 
 export type SetTurnOrderPayload = TurnOrder;
 

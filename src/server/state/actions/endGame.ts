@@ -1,6 +1,7 @@
-import { EndGameResult, HistoryRecord, ActionTemplate, StateContext, Metadata } from '../../types';
+import { HistoryRecord, ActionTemplate, StateContext, Metadata } from '../../types';
 import { actionTypes } from './actionTypes';
 import { historyRecordsTypes } from '../../constants';
+import { EndGameResult } from '../../../shared/types/gameState';
 
 export type EndGamePayload = EndGameResult;
 

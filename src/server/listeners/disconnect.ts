@@ -25,7 +25,6 @@ const disconnect =
             if (gameConfig.logErrors) {
                 console.log(`${socket.id} disconnected from room ${roomId}`);
             }
-            io.to(roomId).emit(events.rooms.ROOM_STATE_CHANGED, networkState);
 
             // Remove the game data if it exists
             const roomData = getRoomGameData<
@@ -43,8 +42,14 @@ const disconnect =
                         otherPlayer.nickname = undefined;
                     }
                 }
-                //TODO: on client remember to set network state to default after receiving this event
                 removeRoomGameData(roomId);
+                io.to(roomId).emit(events.rooms.ROOM_STATE_CHANGED, {
+                    roomId: null,
+                    players: [],
+                    playerNickname: null,
+                });
+            } else {
+                io.to(roomId).emit(events.rooms.ROOM_STATE_CHANGED, networkState);
             }
         }
     };

@@ -2,26 +2,15 @@ import { Card, CardTemplate, Zone } from './gameObjects';
 import { ActionRegistry, MovesRegistry } from './registries';
 import { GameConfig } from './gameConfig';
 import { historyRecordsTypes } from '../constants';
+import { EndGameResult, Teams, TurnOrder } from '../../shared/types/gameState';
 
 export type NetworkState = {
-    //playerId?: string; Only on client
-    //playerNickname?: string; Only on client
-    //initialized: boolean; Only on client
     roomId: string;
     players: {
         playerId: string;
         playerNickname: string;
     }[];
 } | null;
-
-export type TurnOrder = {
-    activePlayer: string;
-    nextPlayer: string;
-    playOrder: string[];
-    activePlayerIndex: number;
-};
-
-export type Teams = { [teamId: string]: string[] };
 
 export type GameState<
     CustomState extends Record<string, any>,
@@ -221,10 +210,4 @@ export type MoveDefinition<
     execute: (payload: Payload, ctx: StateContext<CS, CGO, CZ, CC>, meta: Metadata) => void;
     message: (payload: Payload, ctx: StateContext<CS, CGO, CZ, CC>, meta: Metadata) => string;
     changeTurnAfter?: boolean;
-};
-
-export type EndGameResult = {
-    winner?: string;
-    isTie: boolean;
-    reason?: string;
 };

@@ -7,7 +7,8 @@
         "declarationDir": "dist/types",
         "rootDir": "src",
         "allowSyntheticDefaultImports": true,
-        "types": ["jest", "node"]
+        "types": ["jest", "node"],
+        "jsx": "react-jsx"
     },
     "exclude": ["node_modules", "dist"]
 }
