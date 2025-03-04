@@ -1,4 +1,4 @@
-import { ReduxState, Selection } from '../types/gameState';
+import { ReduxState, Selection } from '../types';
 
 export const getSelection = (state: ReduxState<any, any, any, any>): Selection => {
     return state.game.coreState.selection;

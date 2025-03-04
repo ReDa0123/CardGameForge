@@ -1,4 +1,6 @@
-import { ReduxState } from '../types/gameState';
+import { ReduxState } from '../types';
+
+export const getHistory = (state: ReduxState<any, any, any, any>) => state.game.coreState.history;
 
 export const getHistoryMessages = (state: ReduxState<any, any, any, any>): string[] => {
     return state.game.coreState.history

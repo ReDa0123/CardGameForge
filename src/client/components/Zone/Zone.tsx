@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { getZoneById } from '../../selectors/getZoneById';
+import { getZoneById } from '../../selectors';
 import { ZoneHand } from './ZoneHand';
 import { ZoneDeck } from './ZoneDeck';
 import { ZonePile } from './ZonePile';

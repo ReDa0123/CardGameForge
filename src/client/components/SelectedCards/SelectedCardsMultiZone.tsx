@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { ReduxState } from '../../types/gameState';
+import { ReduxState } from '../../types';
 import { SelectedCards } from './SelectedCards';
 import { Box, Typography, BoxProps, TypographyProps } from '@mui/material';
 

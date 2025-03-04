@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useSocket } from '../context/gameContext';
+import { useSocket } from '../context';
 import { events } from '../../shared/constants/events';
 import { PlayMoveArgs } from '../../shared/types/events';
 

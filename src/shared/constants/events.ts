@@ -8,6 +8,7 @@ export const events = {
         ROOM_STATE_CHANGED: 'roomStateChanges',
         GAME_START: 'gameStart',
         INVALID_NUMBER_OF_PLAYERS: 'invalidNumberOfPlayers',
+        RESET_NETWORK_STATE: 'resetNetworkState',
     },
     PLAY_MOVE: 'playMove',
     MOVE_FAILED: 'moveFailed',

@@ -1,4 +1,4 @@
-import { getHistoryMessagesWithTimestamps } from '../../selectors/history';
+import { getHistoryMessagesWithTimestamps } from '../../selectors';
 import { useSelector } from 'react-redux';
 import { Box, BoxProps, Stack, StackProps, Typography, TypographyProps } from '@mui/material';
 import React from 'react';

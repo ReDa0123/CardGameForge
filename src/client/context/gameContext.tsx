@@ -1,16 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
-import gameReducer, { setClientId, setNetworkState, updateGameState } from './gameSlice';
+import gameReducer, { leaveRoom, setClientId, setNetworkState, updateGameState } from './gameSlice';
 import React, { createContext, useContext, useEffect } from 'react';
-import { GameContextType, NetworkState } from '../types/gameState';
-import { GameContextProviderProps } from '../types/context';
+import { GameContextType, NetworkState, GameContextProviderProps } from '../types';
 import { Provider, useDispatch } from 'react-redux';
 import { io, Socket } from 'socket.io-client';
 import { events } from '../../shared/constants/events';
 import { SnackbarProvider } from 'notistack';
-import { useNotification } from '../hooks/useNotification';
+import { useNotification } from '../hooks';
 import { createTheme, ThemeProvider } from '@mui/material';
 
-export const store = configureStore({
+const store = configureStore({
     reducer: {
         game: gameReducer,
     },
@@ -19,7 +18,7 @@ export const store = configureStore({
 
 const DefaultComponent: React.FC = () => null;
 
-export const gameContext = createContext<GameContextType>({
+const gameContext = createContext<GameContextType>({
     displayRegistry: {
         default: DefaultComponent,
     },
@@ -72,18 +71,25 @@ const GameContextInner: React.FC<Omit<GameContextProviderProps, 'materialTheme'>
             // Listen for room state changes
             socket.on(
                 events.rooms.ROOM_STATE_CHANGED,
-                (roomState: Pick<NetworkState, 'roomId' | 'players' | 'playerNickname'>) => {
+                (roomState: Pick<NetworkState, 'roomId' | 'players'>) => {
                     const clientNetworkState: NetworkState = {
                         ...roomState,
-                        playerNickname:
-                            roomState.playerNickname ??
-                            roomState.players!.find((player) => player.playerId === socket.id)
-                                ?.playerNickname,
+                        playerNickname: roomState.players!.find(
+                            (player) => player.playerId === socket.id
+                        )?.playerNickname,
                         playerId: socket.id,
                     };
                     dispatch(setNetworkState(clientNetworkState));
                 }
             );
+
+            socket.on(events.rooms.RESET_NETWORK_STATE, () => {
+                dispatch(leaveRoom());
+                notify(
+                    'A player left the game, you have been disconnected from the room',
+                    'warning'
+                );
+            });
 
             // Listen for state changes
             socket.on(events.GAME_STATE_CHANGED, (gameState) => {

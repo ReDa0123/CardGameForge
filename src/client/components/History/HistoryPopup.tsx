@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
-import { getHistoryMessages } from '../../selectors/history';
+import { getHistoryMessages } from '../../selectors';
 import { useEffect } from 'react';
-import { useNotification } from '../../hooks/useNotification';
+import { useNotification } from '../../hooks';
 
 export const HistoryPopup = () => {
     const history = useSelector(getHistoryMessages);

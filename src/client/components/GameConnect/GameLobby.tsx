@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
-import { getRoomPlayersCount } from '../../selectors/getRoomPlayersCount';
-import { useSocket } from '../../context/gameContext';
+import { getRoomPlayersCount, getRoomId } from '../../selectors';
+import { useSocket } from '../../context';
 import React, { useCallback } from 'react';
 import { events } from '../../../shared/constants/events';
 import { Button, Grid2 as Grid, Stack, Typography } from '@mui/material';
@@ -19,6 +19,7 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
     gameOptions,
 }) => {
     const numberOfPlayers = useSelector(getRoomPlayersCount);
+    const roomId = useSelector(getRoomId)!;
     const socket = useSocket();
     const onGameStart = useCallback(() => {
         if (gameOptions) {
@@ -35,7 +36,7 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
     return (
         <Grid container spacing={2}>
             <Grid size={12}>
-                <Typography variant="h4">Game lobby</Typography>
+                <Typography variant="h4">Game lobby - room: {roomId}</Typography>
             </Grid>
             <Grid size={6}>
                 <Button onClick={onRoomLeave} color="error">

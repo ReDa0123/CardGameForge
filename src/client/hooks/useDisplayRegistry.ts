@@ -1,6 +1,6 @@
-import { useGameContext } from '../context/gameContext';
+import { useGameContext } from '../context';
 import { useSelector } from 'react-redux';
-import { findCardInZone } from '../selectors/findCardInZone';
+import { findCardInZone } from '../selectors';
 import React, { useMemo } from 'react';
 
 export const useDisplayRegistry = (cardId: string, zoneId: string): React.ComponentType<any> => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zone as ZoneType } from '../../types/gameObjects';
+import { Zone as ZoneType } from '../../types';
 import { Card } from '../Card';
 import { Box, Paper, Typography, Badge, BoxProps, BadgeProps } from '@mui/material';
 

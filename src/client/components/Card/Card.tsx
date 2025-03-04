@@ -1,9 +1,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { getZoneById } from '../../selectors/getZoneById';
-import { useDisplayRegistry } from '../../hooks/useDisplayRegistry';
+import { getZoneById, getNetworkInfo } from '../../selectors';
+import { useDisplayRegistry } from '../../hooks';
 import { Box, Paper } from '@mui/material';
-import { getNetworkInfo } from '../../selectors/getNetworkInfo';
 
 type CardProps = {
     cardId: string;

@@ -1,10 +1,9 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { getSelectedCardsInZone } from '../../selectors/selection';
-import { getZoneById } from '../../selectors/getZoneById';
+import { getSelectedCardsInZone, getZoneById } from '../../selectors';
 import { Card } from '../Card';
 import { Box, Typography, Paper, BoxProps, PaperProps, TypographyProps } from '@mui/material';
-import { unselectCard } from '../../context/gameSlice';
+import { unselectCard } from '../../context';
 
 type SelectedCardsProps = {
     zoneId: string;

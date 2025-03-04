@@ -43,11 +43,7 @@ const disconnect =
                     }
                 }
                 removeRoomGameData(roomId);
-                io.to(roomId).emit(events.rooms.ROOM_STATE_CHANGED, {
-                    roomId: null,
-                    players: [],
-                    playerNickname: null,
-                });
+                io.to(roomId).emit(events.rooms.RESET_NETWORK_STATE);
             } else {
                 io.to(roomId).emit(events.rooms.ROOM_STATE_CHANGED, networkState);
             }

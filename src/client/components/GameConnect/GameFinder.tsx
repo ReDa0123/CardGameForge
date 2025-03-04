@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useCallback, useState } from 'react';
-import { useSocket } from '../../context/gameContext';
+import { useSocket } from '../../context';
 import { events } from '../../../shared/constants/events';
 import { JoinRoomArgs } from '../../../shared/types/events';
 import { Button, Stack, TextField } from '@mui/material';

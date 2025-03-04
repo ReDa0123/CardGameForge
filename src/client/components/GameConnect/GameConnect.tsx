@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { isInLobby } from '../../selectors/isInLobby';
+import { isInLobby } from '../../selectors';
 import { GameFinder } from './GameFinder';
 import React from 'react';
 import { GameLobby } from './GameLobby';

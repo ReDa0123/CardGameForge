@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { GameState, NetworkState } from '../types/gameState';
-import { SelectCardPayload } from '../types/context';
+import { GameState, NetworkState, SelectCardPayload } from '../types';
 
 const initialGameState: GameState<
     Record<string, any>,
@@ -44,9 +43,13 @@ const gameSlice = createSlice({
                     Record<string, any>
                 >
             >
-        ) => {
+        ): GameState<any, any, any, any> => {
             return {
                 ...action.payload,
+                coreState: {
+                    ...action.payload.coreState,
+                    selection: state.coreState.selection,
+                },
                 networkState: {
                     ...action.payload.networkState,
                     playerId: state.networkState!.playerId,
@@ -87,9 +90,6 @@ const gameSlice = createSlice({
             state: GameState<any, any, any, any>,
             action: PayloadAction<NetworkState>
         ) => {
-            if (state.coreState.gameInProgress && !action.payload.roomId) {
-                state = initialGameState;
-            }
             state.networkState = action.payload;
         },
         setClientId: (state: GameState<any, any, any, any>, action: PayloadAction<string>) => {

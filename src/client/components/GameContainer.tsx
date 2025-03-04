@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import React from 'react';
-import { isGameActive } from '../selectors/isGameActive';
-import { GameConnect } from './GameConnect/GameConnect';
+import { isGameActive } from '../selectors';
+import { GameConnect } from './GameConnect';
 
 type GameContainerProps = {
     GameComponent: React.ComponentType<any>;
