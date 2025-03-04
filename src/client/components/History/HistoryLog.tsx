@@ -9,6 +9,12 @@ type HistoryLogProps = {
     textProps?: TypographyProps;
 };
 
+/**
+ * HistoryLog component that displays the history of the game.
+ * @param containerProps - The props for the container.
+ * @param recordProps - The props for the record.
+ * @param textProps - The props for the text.
+ */
 export const HistoryLog: React.FC<HistoryLogProps> = ({
     containerProps = {},
     recordProps = {},

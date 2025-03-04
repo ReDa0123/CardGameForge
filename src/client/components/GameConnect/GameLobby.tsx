@@ -12,6 +12,13 @@ type GameLobbyProps = {
     gameOptions?: Record<string, any>;
 };
 
+/**
+ * GameLobby component that displays the game lobby.
+ * @param minNumberOfPlayers - The minimum number of players required to start the game.
+ * @param maxNumberOfPlayers - The maximum number of players allowed in the game.
+ * @param GameOptionsFormComponent - The component that displays the game options.
+ * @param gameOptions - The game options.
+ */
 export const GameLobby: React.FC<GameLobbyProps> = ({
     minNumberOfPlayers,
     maxNumberOfPlayers,

@@ -27,6 +27,12 @@ const gameContext = createContext<GameContextType>({
 
 const GameProvider = gameContext.Provider;
 
+/**
+ * GameContextInner component that provides the game context to the children.
+ * @param displayRegistry - The display registry
+ * @param serverAddress - The server address
+ * @param children - The children
+ */
 const GameContextInner: React.FC<Omit<GameContextProviderProps, 'materialTheme'>> = ({
     displayRegistry,
     serverAddress,
@@ -118,6 +124,13 @@ const GameContextInner: React.FC<Omit<GameContextProviderProps, 'materialTheme'>
 
 const defaultMaterialTheme = createTheme({});
 
+/**
+ * GameContextProvider component that provides the game context to the children.
+ * @param displayRegistry - The display registry
+ * @param children - The children
+ * @param serverAddress - The server address
+ * @param materialTheme - The material theme
+ */
 export const GameContextProvider: React.FC<GameContextProviderProps> = ({
     displayRegistry,
     children,
@@ -145,8 +158,14 @@ export const GameContextProvider: React.FC<GameContextProviderProps> = ({
     );
 };
 
+/**
+ * useGameContext hook that returns the game context.
+ */
 export const useGameContext = () => useContext(gameContext);
 
+/**
+ * useSocket hook that returns the socket.
+ */
 export const useSocket = () => {
     const { socket } = useGameContext();
     return socket;

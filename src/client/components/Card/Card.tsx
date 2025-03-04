@@ -13,6 +13,16 @@ type CardProps = {
     onClick?: (cardId: string, zoneId: string) => void;
 };
 
+/**
+ * Card component that displays a card in a zone based on the card id and zone id.
+ * It uses the display registry to get the card display component.
+ * It also handles the face down state of the card based on the zone owner and the current player.
+ * @param cardId - The id of the card
+ * @param zoneId - The id of the zone
+ * @param isFaceDown - Whether the card is face down
+ * @param rotation - The rotation of the card
+ * @param offset - The offset of the card
+ */
 export const Card: React.FC<CardProps> = ({
     cardId,
     zoneId,

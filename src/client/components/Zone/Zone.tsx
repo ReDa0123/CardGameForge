@@ -39,6 +39,20 @@ type ZonePileProps = ZoneBaseProps & {
 // Union type for all possible zone props
 export type ZoneProps = ZoneHandProps | ZoneDeckProps | ZonePileProps;
 
+/**
+ * Zone component that displays a zone based on the zone id and style type.
+ * @param zoneId - The id of the zone
+ * @param styleType - The style type of the zone
+ * @param handStyle - The style of the hand - only used if styleType is 'hand'
+ * @param topCardsCount - The number of top cards to display - only used if styleType is 'deck' or 'pile'
+ * @param zoneHandContainerProps - The props for the zone hand container
+ * @param zoneHandCardContainerProps - The props for the zone hand card container
+ * @param zoneDeckContainerProps - The props for the zone deck container
+ * @param zoneDeckCardContainerProps - The props for the zone deck card container
+ * @param zoneDeckBadgeProps - The props for the zone deck badge
+ * @param zonePileContainerProps - The props for the zone pile container
+ * @param zonePileCardContainerProps - The props for the zone pile card container
+ */
 export const Zone: React.FC<ZoneProps> = (props) => {
     const { zoneId, styleType } = props;
     const zone = useSelector(getZoneById(zoneId));

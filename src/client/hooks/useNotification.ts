@@ -3,6 +3,11 @@ import { useCallback } from 'react';
 
 type AllowedVariant = 'default' | 'error' | 'success' | 'warning' | 'info';
 
+/**
+ * React hook that returns a function to display a notification.
+ * @param message - The message to display
+ * @param variant - The variant of the notification
+ */
 export const useNotification = () => {
     const { enqueueSnackbar } = useSnackbar();
 

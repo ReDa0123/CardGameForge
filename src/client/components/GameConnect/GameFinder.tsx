@@ -4,6 +4,9 @@ import { events } from '../../../shared/constants/events';
 import { JoinRoomArgs } from '../../../shared/types/events';
 import { Button, Stack, TextField } from '@mui/material';
 
+/**
+ * GameFinder component that allows a player to join a room.
+ */
 export const GameFinder: React.FC = () => {
     const socket = useSocket();
     const [roomId, setRoomId] = useState('');

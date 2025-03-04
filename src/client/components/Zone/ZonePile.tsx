@@ -11,6 +11,15 @@ type ZonePileProps = {
     cardCountProps?: Omit<ChipProps, 'label' | 'size' | 'color' | 'sx'> & { sx?: ChipProps['sx'] };
 };
 
+/**
+ * ZonePile component that displays a pile of cards.
+ * By default, the topCardsCount is 3.
+ * @param zone - The zone
+ * @param topCardsCount - The number of top cards to display
+ * @param containerProps - The props for the container
+ * @param cardContainerProps - The props for the card container
+ * @param cardCountProps - The props for the card count
+ */
 export const ZonePile: React.FC<ZonePileProps> = ({
     zone,
     topCardsCount = 3,

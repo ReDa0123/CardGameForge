@@ -15,6 +15,17 @@ type SelectedCardsProps = {
     titleProps?: Omit<TypographyProps, 'sx'> & { sx?: TypographyProps['sx'] };
 };
 
+/**
+ * SelectedCards component that displays the selected cards in a zone.
+ * By defualt, the onClick event will unselect the card.
+ * @param zoneId - The id of the zone
+ * @param title - The title of the selected cards
+ * @param onCardClick - The function to call when a card is clicked
+ * @param containerProps - The props for the container
+ * @param cardContainerProps - The props for the card container
+ * @param paperProps - The props for the paper
+ * @param titleProps - The props for the title
+ */
 export const SelectedCards: React.FC<SelectedCardsProps> = ({
     zoneId,
     title = 'Selected Cards',

@@ -29,6 +29,9 @@ const initialGameState: GameState<
     networkState: {},
 };
 
+/**
+ * gameSlice is a slice of the game state.
+ */
 const gameSlice = createSlice({
     name: 'game',
     initialState: initialGameState,

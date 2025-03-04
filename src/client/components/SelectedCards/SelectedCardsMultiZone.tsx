@@ -16,6 +16,17 @@ type SelectedCardsMultiZoneProps = {
     >;
 };
 
+/**
+ * SelectedCardsMultiZone component that displays the selected cards in multiple zones.
+ * If zoneIds are provided, it will only display the selected cards in those zones.
+ * Otherwise, it will display all zones that have selected cards.
+ * @param zoneIds - The ids of the zones
+ * @param title - The title of the selected cards
+ * @param onCardClick - The function to call when a card is clicked
+ * @param containerProps - The props for the container
+ * @param titleProps - The props for the title
+ * @param selectedCardsProps - The props for the selected cards
+ */
 export const SelectedCardsMultiZone: React.FC<SelectedCardsMultiZoneProps> = ({
     zoneIds,
     title = 'Selected Cards',

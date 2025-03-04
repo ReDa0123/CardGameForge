@@ -10,6 +10,15 @@ type ZoneHandProps = {
     cardContainerProps?: Omit<BoxProps, 'sx'> & { sx?: BoxProps['sx'] };
 };
 
+/**
+ * ZoneHand component that displays a hand of cards.
+ * Hand style can be 'line' or 'fan' - 'line' is a straight line of cards, 'fan' is an arc of cards.
+ * By default, the hand style is 'fan'.
+ * @param zone - The zone
+ * @param handStyle - The style of the hand
+ * @param containerProps - The props for the container
+ * @param cardContainerProps - The props for the card container
+ */
 export const ZoneHand: React.FC<ZoneHandProps> = ({
     zone,
     handStyle = 'fan',

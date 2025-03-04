@@ -11,6 +11,14 @@ type ZoneDeckProps = {
     badgeProps?: Omit<BadgeProps, 'badgeContent' | 'children' | 'sx'> & { sx?: BadgeProps['sx'] };
 };
 
+/**
+ * ZoneDeck component that displays a deck of cards.
+ * @param zone - The zone
+ * @param topCardsCount - The number of top cards to display
+ * @param containerProps - The props for the container
+ * @param cardContainerProps - The props for the card container
+ * @param badgeProps - The props for the badge
+ */
 export const ZoneDeck: React.FC<ZoneDeckProps> = ({
     zone,
     topCardsCount = 3,
