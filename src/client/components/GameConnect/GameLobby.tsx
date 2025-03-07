@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux';
 import { getRoomPlayersCount, getRoomId } from '../../selectors';
 import { useSocket } from '../../context';
 import React, { useCallback } from 'react';
-import { events } from '../../../shared/constants/events';
+import { events } from '../../../shared';
 import { Button, Grid2 as Grid, Stack, Typography } from '@mui/material';
 
 type GameLobbyProps = {

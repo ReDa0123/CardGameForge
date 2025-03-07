@@ -4,9 +4,9 @@
     "scripts": {
         "build:server": "tsc -p tsconfig.server.json",
         "build:client": "tsc -p tsconfig.client.json",
-        "dev:server": "tsc --watch -p tsconfig.server.json & nodemon dist/server/index.js",
+        "dev:server": "tsc --watch -p tsconfig.server.json & nodemon dist/server/server/index.js",
         "dev:client": "tsc --watch -p tsconfig.client.json",
-        "start:server": "node dist/server/index.js",
+        "start:server": "node dist/server/server/index.js",
         "prettier": "prettier --check \"src/**/*.{js,jsx,ts,tsx,vue,html,css,scss,md}\"",
         "lint": "eslint --ext .ts,.tsx src",
         "prepare": "husky install",

@@ -1,5 +1,5 @@
 export type TurnOrder = {
-    activePlayer: string;
+    activePlayer: string | 'EVERYBODY';
     nextPlayer: string;
     playOrder: string[];
     activePlayerIndex: number;

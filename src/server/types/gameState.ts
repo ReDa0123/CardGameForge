@@ -2,7 +2,7 @@ import { Card, CardTemplate, Zone } from './gameObjects';
 import { ActionRegistry, MovesRegistry } from './registries';
 import { GameConfig } from './gameConfig';
 import { historyRecordsTypes } from '../constants';
-import { EndGameResult, Teams, TurnOrder } from '../../shared/types/gameState';
+import { EndGameResult, Teams, TurnOrder } from '../../shared';
 
 export type NetworkState = {
     roomId: string;
@@ -38,6 +38,7 @@ export type GameState<
 
 export type Metadata = {
     playerId?: string;
+    teamId?: string;
     playerNickname?: string;
     timestamp: Date;
     moveId?: string;

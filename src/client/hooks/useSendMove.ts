@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { useSocket } from '../context';
-import { events } from '../../shared/constants/events';
-import { PlayMoveArgs } from '../../shared/types/events';
+import { events, PlayMoveArgs } from '../../shared';
 
 /**
  * React hook that returns a function to send a move to the server.

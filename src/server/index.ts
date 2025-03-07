@@ -13,7 +13,15 @@ import {
     RemoveFromZonePayload,
     ShuffleZonePayload,
     ChangeCardPayload,
+    SetActivePlayerPayload,
+    MoveCardsFromZonePayload,
 } from './state';
+import { ServerOptions } from 'socket.io';
+
+export * from './types';
+export * from '../shared';
+
+export type { ServerOptions };
 
 export {
     setupAndRunServer,
@@ -31,4 +39,6 @@ export {
     RemoveFromZonePayload,
     ShuffleZonePayload,
     ChangeCardPayload,
+    SetActivePlayerPayload,
+    MoveCardsFromZonePayload,
 };

@@ -1,6 +1,6 @@
 import { getTeams, getTeamPlayersByTeamId, getTeamPlayersByPlayerId, areTeammates } from '../teams';
 import { GameState, ReduxState } from '../../types';
-import { Teams } from '../../../shared/types/gameState';
+import { Teams } from '../../../shared';
 
 describe('teams selectors', () => {
     const mockTeams: Teams = {

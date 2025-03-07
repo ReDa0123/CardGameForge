@@ -4,7 +4,7 @@ const config: Config = {
     preset: 'ts-jest',
     testEnvironment: 'node',
     testMatch: ['<rootDir>/src/**/__tests__/**/*.ts?(x)', '<rootDir>/src/**/*.(spec|test).ts?(x)'],
-    moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+    moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node', 'd.ts'],
     testPathIgnorePatterns: ['<rootDir>/dist/'],
 };
 

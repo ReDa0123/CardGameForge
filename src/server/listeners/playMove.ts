@@ -1,8 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { GameConfig, Metadata, MoveDefinition } from '../types';
 import { getRoomGameData, getNetworkState, executeMove } from '../state';
-import { events } from '../../shared/constants/events';
-import { PlayMoveArgs } from '../../shared/types/events';
+import { events, EVERYBODY, PlayMoveArgs } from '../../shared';
 
 const playMove =
     <
@@ -54,7 +53,7 @@ const playMove =
         const activePlayer = gameState.coreState.turnOrder.activePlayer;
         const playerId = socket.id;
 
-        if (activePlayer !== playerId) {
+        if (activePlayer !== playerId && activePlayer !== EVERYBODY) {
             if (gameConfig.logErrors) {
                 console.log(`${playerId} is not the active player`);
             }
@@ -70,9 +69,21 @@ const playMove =
             return;
         }
 
+        const teams = gameState.coreState.teams;
+        let teamId: string | undefined;
+        if (teams !== null) {
+            const teamsEntries = Object.entries(teams);
+            for (const [id, players] of teamsEntries) {
+                if (players.includes(playerId)) {
+                    teamId = id;
+                }
+            }
+        }
+
         const meta: Metadata = {
             roomId,
             playerId,
+            teamId,
             playerNickname: socket.nickname,
             timestamp: new Date(),
             moveId: moveName,

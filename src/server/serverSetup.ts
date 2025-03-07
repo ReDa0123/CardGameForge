@@ -2,7 +2,7 @@ import { createServer } from 'http';
 import { Server, ServerOptions } from 'socket.io';
 import { GameConfig, SocketListener } from './types';
 import { joinRoom, disconnectFromRoom, disconnect, gameStart, playMove } from './listeners';
-import { events } from '../shared/constants/events';
+import { events } from '../shared';
 import { setLoadedConfig } from './state';
 
 /**

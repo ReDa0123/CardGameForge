@@ -15,7 +15,7 @@ import {
     setLoadedConfig,
 } from '../gameState';
 import { expect } from '@jest/globals';
-import { EndGameResult } from '../../../shared/types/gameState';
+import { EndGameResult } from '../../../shared';
 
 const roomId = 'testRoom';
 

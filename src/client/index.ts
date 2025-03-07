@@ -18,6 +18,8 @@ import {
     GameContextProviderProps,
 } from './types';
 
+export * from '../shared';
+
 export {
     NetworkState,
     Selection,

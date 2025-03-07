@@ -3,7 +3,7 @@ import { HistoryRecord, StateContext } from '../../../types';
 import { getInitialGameState, getMeta } from '../testUtils';
 import { historyRecordsTypes } from '../../../constants';
 import { actionTypes } from '../actionTypes';
-import { EndGameResult } from '../../../../shared/types/gameState';
+import { EndGameResult } from '../../../../shared';
 
 describe('endGame action', () => {
     it('should end the game and set endResult', () => {

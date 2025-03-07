@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io';
-import { events } from '../../shared/constants/events';
+import { events } from '../../shared';
 import { getNetworkState } from '../state';
 import { getRoomGameData, removeRoomGameData } from '../state';
 import { GameConfig } from '../types';

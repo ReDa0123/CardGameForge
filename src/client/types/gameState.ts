@@ -1,4 +1,4 @@
-import { EndGameResult, Teams, TurnOrder } from '../../shared/types/gameState';
+import { EndGameResult, Teams, TurnOrder } from '../../shared';
 import { CardTemplate, Zone } from './gameObjects';
 import { DisplayRegistry } from './context';
 import { Socket } from 'socket.io-client';
@@ -59,6 +59,11 @@ export type GameContextType = {
     socket: Socket | null;
 };
 
-export type ReduxState<CS, CGO, CZ, CC> = {
+export type ReduxState<
+    CS extends Record<string, any>,
+    CGO extends Record<string, any>,
+    CZ extends Record<string, any>,
+    CC extends Record<string, any>
+> = {
     game: GameState<CS, CGO, CZ, CC>;
 };

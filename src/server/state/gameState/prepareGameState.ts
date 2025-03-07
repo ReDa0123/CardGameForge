@@ -11,7 +11,7 @@ import {
     Metadata,
 } from '../../types';
 import { createStateContext } from './createStateContext';
-import { TurnOrder } from '../../../shared/types/gameState';
+import { TurnOrder } from '../../../shared';
 
 /**
  * Prepare the initial game state for a room.

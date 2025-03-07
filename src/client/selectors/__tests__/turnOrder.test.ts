@@ -6,7 +6,7 @@ import {
     getActivePlayerIndex,
 } from '../turnOrder';
 import { GameState, ReduxState } from '../../types';
-import { TurnOrder } from '../../../shared/types/gameState';
+import { TurnOrder } from '../../../shared';
 
 describe('turnOrder selectors', () => {
     const mockTurnOrder: TurnOrder = {

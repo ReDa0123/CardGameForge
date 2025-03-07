@@ -2,20 +2,23 @@ import { ActionTemplate, GameState } from '../../types';
 import { actionTypes } from './actionTypes';
 
 export type ChangeZonePayload = {
-    cardId: string;
+    cardIds: string | string[];
     fromZoneId: string;
     toZoneId: string;
 };
 
 /**
- * Action to change a card's zone.
- * Payload - The ID of the card to change, the ID of the zone it's in, and the ID of the zone to move it to.
+ * Action to change cards' zones.
+ * Can pass multiple card IDs to change multiple cards' zones at once.
+ * Payload - The IDs of the cards to change, the ID of the zone they're in, and the ID of the zone to move them to.
  */
 const changeZone: ActionTemplate<ChangeZonePayload> = {
     name: actionTypes.CHANGE_ZONE,
     apply: (payload, ctx, meta) => {
-        const { cardId, fromZoneId, toZoneId } = payload;
+        const cardIds = Array.isArray(payload.cardIds) ? payload.cardIds : [payload.cardIds];
+        const { fromZoneId, toZoneId } = payload;
         const state = ctx.getState();
+
         //Check if fromZone and toZone exist
         const fromZone = state.coreState.zones[fromZoneId];
         if (!fromZone) {
@@ -32,18 +35,23 @@ const changeZone: ActionTemplate<ChangeZonePayload> = {
             return { ...state };
         }
 
-        const card = state.coreState.zones[fromZoneId].cards.find((c) => c.id === cardId);
-        // Check if card exists in fromZone
-        if (!card) {
+        // Find all cards that exist in fromZone
+        const cardsToMove = fromZone.cards.filter((c) => cardIds.includes(c.id));
+        const missingCardIds = cardIds.filter((id) => !fromZone.cards.some((c) => c.id === id));
+
+        // Check if all cards exist in fromZone
+        if (missingCardIds.length > 0) {
             if (ctx.loadedConfig?.logErrors) {
                 console.error(
-                    `${meta.roomId}: Card ${cardId} does not exist in zone ${fromZoneId}`
+                    `${meta.roomId}: Cards ${missingCardIds.join(
+                        ', '
+                    )} do not exist in zone ${fromZoneId}`
                 );
             }
             return { ...state };
         }
 
-        // Change the card's zone
+        // Change the cards' zone
         const newState: GameState<any, any, Record<string, any>, Record<string, any>> = {
             ...state,
             coreState: {
@@ -52,11 +60,11 @@ const changeZone: ActionTemplate<ChangeZonePayload> = {
                     ...state.coreState.zones,
                     [fromZoneId]: {
                         ...fromZone,
-                        cards: fromZone.cards.filter((c) => c.id !== cardId),
+                        cards: fromZone.cards.filter((c) => !cardIds.includes(c.id)),
                     },
                     [toZoneId]: {
                         ...toZone,
-                        cards: [...toZone.cards, card],
+                        cards: [...toZone.cards, ...cardsToMove],
                     },
                 },
             },

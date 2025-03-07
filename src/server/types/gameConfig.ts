@@ -1,6 +1,6 @@
 import { ActionDefinition, GameState, Metadata, MoveDefinition, StateContext } from './gameState';
 import { CardTemplate } from './gameObjects';
-import { EndGameResult } from '../../shared/types/gameState';
+import { EndGameResult } from '../../shared';
 
 export type PhaseDefinition = {
     name: string;

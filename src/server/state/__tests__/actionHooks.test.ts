@@ -15,7 +15,7 @@ import {
     setLoadedConfig,
 } from '../gameState';
 import { expect } from '@jest/globals';
-import { EndGameResult } from '../../../shared/types/gameState';
+import { EndGameResult } from '../../../shared';
 
 const PERMANENT_HOOK = 'permanentHook';
 const ONCE_HOOK = 'onceHook';
@@ -79,7 +79,7 @@ const performActions: MoveDefinition<any, any, any, Record<string, any>, Record<
         const toZoneId = calls.permanent % 2 === 0 ? testZone1.zoneId : `${testZone2.zoneId}_1`;
         ctx.dispatchAction<ChangeZonePayload>(
             actionTypes.CHANGE_ZONE,
-            { cardId: 'testCard_0', fromZoneId, toZoneId },
+            { cardIds: 'testCard_0', fromZoneId, toZoneId },
             meta
         );
     },

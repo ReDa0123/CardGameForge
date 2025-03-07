@@ -23,7 +23,11 @@ const changePhase: ActionTemplate<ChangePhasePayload> = {
 
         if (!nextPhase) {
             if (loadedConfig.logErrors) {
-                console.error(`No next phase found for phase ${state.coreState.phase}`);
+                console.error(
+                    `No next phase found for phase ${state.coreState.phase} - trying to change to ${
+                        payload.phase || 'next'
+                    }`
+                );
             }
             return { ...state };
         }

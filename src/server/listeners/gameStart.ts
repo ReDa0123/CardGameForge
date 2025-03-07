@@ -1,9 +1,8 @@
 import { Server, Socket } from 'socket.io';
 import { GameConfig } from '../types';
 import { getNetworkState } from '../state';
-import { events } from '../../shared/constants/events';
+import { events, GameStartArgs } from '../../shared';
 import { prepareGameState } from '../state';
-import { GameStartArgs } from '../../shared/types/events';
 
 const gameStart =
     <

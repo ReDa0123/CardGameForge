@@ -5,12 +5,14 @@ cardgameforge.iml
 /node_modules
 /.pnp
 .pnp.js
+/examples/tichu/node_modules
 
 # testing
 /coverage
 
 # production
 /dist
+/examples/tichu/dist
 
 # misc
 .DS_Store

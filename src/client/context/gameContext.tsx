@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect } from 'react';
 import { GameContextType, NetworkState, GameContextProviderProps } from '../types';
 import { Provider, useDispatch } from 'react-redux';
 import { io, Socket } from 'socket.io-client';
-import { events } from '../../shared/constants/events';
+import { events } from '../../shared';
 import { SnackbarProvider } from 'notistack';
 import { useNotification } from '../hooks';
 import { createTheme, ThemeProvider } from '@mui/material';

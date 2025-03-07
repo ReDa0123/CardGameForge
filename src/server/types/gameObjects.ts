@@ -20,7 +20,7 @@ export type CardTemplate<CC extends Record<string, any>> = {
                 ctx: StateContext<any, any, any, any>,
                 cardId: string,
                 meta: Metadata
-            ) => boolean;
+            ) => { canExecute: boolean; reason?: string };
             execute?: (
                 payload: any,
                 ctx: StateContext<any, any, any, any>,

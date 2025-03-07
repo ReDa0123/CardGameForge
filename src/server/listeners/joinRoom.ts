@@ -1,8 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { GameConfig } from '../types';
-import { events } from '../../shared/constants/events';
+import { events, JoinRoomArgs } from '../../shared';
 import { getNetworkState } from '../state';
-import { JoinRoomArgs } from '../../shared/types/events';
 
 const joinRoom =
     <

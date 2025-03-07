@@ -9,6 +9,8 @@ import addToZone from './addToZone';
 import removeFromZone from './removeFromZone';
 import shuffleZone from './shuffleZone';
 import changeCard from './changeCard';
+import setActivePlayer from './setActivePlayer';
+import moveCardsFromZone from './moveCardsFromZone';
 
 export * from './actionTypes';
 export * from './utils';
@@ -23,6 +25,8 @@ export * from './addToZone';
 export * from './removeFromZone';
 export * from './shuffleZone';
 export * from './changeCard';
+export * from './setActivePlayer';
+export * from './moveCardsFromZone';
 
 export const allLibActions = [
     appendHistory,
@@ -36,4 +40,6 @@ export const allLibActions = [
     removeFromZone,
     shuffleZone,
     changeCard,
+    setActivePlayer,
+    moveCardsFromZone,
 ];
