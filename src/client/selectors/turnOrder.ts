@@ -1,3 +1,4 @@
+import { EVERYBODY } from '../../shared';
 import { ReduxState } from '../types';
 
 /**
@@ -18,6 +19,16 @@ export const getCurrentPlayer = (state: ReduxState<any, any, any, any>): string 
 };
 
 /**
+ * Selector to check if the current player is the active player.
+ * @param state - The redux state
+ * @returns True if the current player is the active player, false otherwise
+ */
+export const areYouActivePlayer = (state: ReduxState<any, any, any, any>): boolean => {
+    const currentPlayer = getCurrentPlayer(state);
+    return currentPlayer === state.game.networkState?.playerId || currentPlayer === EVERYBODY;
+};
+
+/**
  * Selector to get the next player from the redux state.
  * @param state - The redux state
  * @returns The next player
@@ -31,9 +42,8 @@ export const getNextPlayer = (state: ReduxState<any, any, any, any>): string | u
  * @param state - The redux state
  * @returns The play order
  */
-export const getPlayOrder = (state: ReduxState<any, any, any, any>): string[] => {
-    return state.game.coreState.turnOrder.playOrder;
-};
+export const getPlayOrder = (state: ReduxState<any, any, any, any>) =>
+    state.game.coreState.turnOrder.playOrder;
 
 /**
  * Selector to get the active player index from the redux state.

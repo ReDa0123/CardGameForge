@@ -149,7 +149,7 @@ const dragonCard: CardTemplate<TichuCard> = {
             ): { canExecute: boolean; reason?: string } => {
                 const currentCombination = ctx.getState().customState.playedCombination.type;
                 if (
-                    (!!currentCombination || currentCombination === COMBINATIONS.SINGLE) &&
+                    (!currentCombination || currentCombination === COMBINATIONS.SINGLE) &&
                     cardIds.length === 1
                 ) {
                     return { canExecute: true };

@@ -19,6 +19,10 @@ const disconnect =
      * Disconnect listener.
      */
     () => {
+        if (gameConfig.logErrors) {
+            console.log(`${socket.id} disconnected`);
+        }
+
         const networkState = getNetworkState(io, socket.roomId);
         if (networkState) {
             const roomId = socket.roomId!;
@@ -35,15 +39,16 @@ const disconnect =
             >(roomId);
             if (roomData) {
                 const otherPlayersInRoom = io.sockets.adapter.rooms.get(roomId);
+                removeRoomGameData(roomId);
+                io.to(roomId).emit(events.rooms.RESET_NETWORK_STATE);
                 if (otherPlayersInRoom) {
                     for (const otherPlayerId of otherPlayersInRoom) {
                         const otherPlayer = io.sockets.sockets.get(otherPlayerId) as Socket;
                         otherPlayer.roomId = undefined;
                         otherPlayer.nickname = undefined;
+                        otherPlayer.leave(roomId);
                     }
                 }
-                removeRoomGameData(roomId);
-                io.to(roomId).emit(events.rooms.RESET_NETWORK_STATE);
             } else {
                 io.to(roomId).emit(events.rooms.ROOM_STATE_CHANGED, networkState);
             }

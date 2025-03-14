@@ -1,8 +1,8 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "outDir": "dist/client",
-        "rootDir": "src"
+        "allowImportingTsExtensions": true,
+        "noEmit": true
     },
     "include": ["src/client/**/*"]
 }

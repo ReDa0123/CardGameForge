@@ -5,10 +5,14 @@ import { ZoneHand } from './ZoneHand';
 import { ZoneDeck } from './ZoneDeck';
 import { ZonePile } from './ZonePile';
 import { BoxProps, BadgeProps } from '@mui/material';
+import { Card } from '../..';
 
 // Base props for all zone types
 type ZoneBaseProps = {
     zoneId: string;
+    CardProps?: any;
+    CardBackProps?: any;
+    onCardClick?: (cardId: string, zoneId: string) => void;
 };
 
 // Props specific to hand style
@@ -17,6 +21,7 @@ type ZoneHandProps = ZoneBaseProps & {
     handStyle?: 'line' | 'fan';
     zoneHandContainerProps?: BoxProps;
     zoneHandCardContainerProps?: BoxProps;
+    sortFn?: (cards: Card<any>[]) => Card<any>[];
 };
 
 // Props specific to deck style
@@ -26,6 +31,7 @@ type ZoneDeckProps = ZoneBaseProps & {
     zoneDeckContainerProps?: BoxProps;
     zoneDeckCardContainerProps?: BoxProps;
     zoneDeckBadgeProps?: BadgeProps;
+    showFirstCard?: boolean;
 };
 
 // Props specific to pile style
@@ -34,6 +40,8 @@ type ZonePileProps = ZoneBaseProps & {
     topCardsCount?: number;
     zonePileContainerProps?: BoxProps;
     zonePileCardContainerProps?: BoxProps;
+    onPileClick?: (zoneId: string) => void;
+    allFaceDown?: boolean;
 };
 
 // Union type for all possible zone props
@@ -52,6 +60,13 @@ export type ZoneProps = ZoneHandProps | ZoneDeckProps | ZonePileProps;
  * @param zoneDeckBadgeProps - The props for the zone deck badge
  * @param zonePileContainerProps - The props for the zone pile container
  * @param zonePileCardContainerProps - The props for the zone pile card container
+ * @param CardProps - The props for the card
+ * @param CardBackProps - The props for the card back
+ * @param onCardClick - The function to call when the card is clicked
+ * @param onPileClick - The function to call when the pile is clicked if styleType is 'pile'
+ * @param showFirstCard - Whether to show the first card - only used if styleType is 'deck'
+ * @param sortFn - The function to call to sort the cards - only used if styleType is 'hand'
+ * @param allFaceDown - Whether to show all cards face down - only used if styleType is 'pile'
  */
 export const Zone: React.FC<ZoneProps> = (props) => {
     const { zoneId, styleType } = props;
@@ -63,13 +78,25 @@ export const Zone: React.FC<ZoneProps> = (props) => {
 
     switch (styleType) {
         case 'hand': {
-            const { handStyle, zoneHandContainerProps, zoneHandCardContainerProps } = props;
+            const {
+                handStyle,
+                zoneHandContainerProps,
+                zoneHandCardContainerProps,
+                CardProps,
+                CardBackProps,
+                onCardClick,
+                sortFn,
+            } = props;
             return (
                 <ZoneHand
                     zone={zone}
                     handStyle={handStyle}
                     containerProps={zoneHandContainerProps}
                     cardContainerProps={zoneHandCardContainerProps}
+                    CardProps={CardProps}
+                    CardBackProps={CardBackProps}
+                    onCardClick={onCardClick}
+                    sortFn={sortFn}
                 />
             );
         }
@@ -79,6 +106,10 @@ export const Zone: React.FC<ZoneProps> = (props) => {
                 zoneDeckContainerProps,
                 zoneDeckCardContainerProps,
                 zoneDeckBadgeProps,
+                CardProps,
+                CardBackProps,
+                onCardClick,
+                showFirstCard,
             } = props;
             return (
                 <ZoneDeck
@@ -87,17 +118,33 @@ export const Zone: React.FC<ZoneProps> = (props) => {
                     containerProps={zoneDeckContainerProps}
                     cardContainerProps={zoneDeckCardContainerProps}
                     badgeProps={zoneDeckBadgeProps}
+                    CardProps={CardProps}
+                    CardBackProps={CardBackProps}
+                    onCardClick={onCardClick}
+                    showFirstCard={showFirstCard}
                 />
             );
         }
         case 'pile': {
-            const { topCardsCount, zonePileContainerProps, zonePileCardContainerProps } = props;
+            const {
+                topCardsCount,
+                zonePileContainerProps,
+                zonePileCardContainerProps,
+                CardProps,
+                CardBackProps,
+                onPileClick,
+                allFaceDown,
+            } = props;
             return (
                 <ZonePile
                     zone={zone}
                     topCardsCount={topCardsCount}
                     containerProps={zonePileContainerProps}
                     cardContainerProps={zonePileCardContainerProps}
+                    CardProps={CardProps}
+                    CardBackProps={CardBackProps}
+                    onPileClick={onPileClick}
+                    allFaceDown={allFaceDown}
                 />
             );
         }

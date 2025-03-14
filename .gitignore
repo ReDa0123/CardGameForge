@@ -13,6 +13,7 @@ cardgameforge.iml
 # production
 /dist
 /examples/tichu/dist
+/examples/tichu/exports
 
 # misc
 .DS_Store

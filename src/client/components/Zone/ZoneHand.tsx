@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Zone as ZoneType } from '../../types';
 import { Card } from '../Card';
 import { Box, Paper, Typography, BoxProps } from '@mui/material';
+import { Card as CardType } from '../..';
 
 type ZoneHandProps = {
     zone: ZoneType<any, any>;
     handStyle?: 'line' | 'fan';
     containerProps?: Omit<BoxProps, 'sx'> & { sx?: BoxProps['sx'] };
     cardContainerProps?: Omit<BoxProps, 'sx'> & { sx?: BoxProps['sx'] };
+    CardProps?: any;
+    CardBackProps?: any;
+    onCardClick?: (cardId: string, zoneId: string) => void;
+    sortFn?: (cards: CardType<any>[]) => CardType<any>[];
 };
 
 /**
@@ -18,14 +23,29 @@ type ZoneHandProps = {
  * @param handStyle - The style of the hand
  * @param containerProps - The props for the container
  * @param cardContainerProps - The props for the card container
+ * @param CardProps - The props for the card
+ * @param CardBackProps - The props for the card back
+ * @param sortFn - The function to call to sort the cards - only used if styleType is 'hand'
+ * @param onCardClick - The function to call when a card is clicked
  */
 export const ZoneHand: React.FC<ZoneHandProps> = ({
     zone,
     handStyle = 'fan',
     containerProps,
     cardContainerProps,
+    CardProps,
+    CardBackProps,
+    onCardClick,
+    sortFn,
 }) => {
     const cards = zone.cards;
+    const isFanStyle = handStyle === 'fan';
+    const sortedCards = useMemo(() => {
+        if (sortFn) {
+            return sortFn(cards);
+        }
+        return cards;
+    }, [cards, sortFn]);
 
     if (cards.length === 0) {
         return (
@@ -64,21 +84,33 @@ export const ZoneHand: React.FC<ZoneHandProps> = ({
             }}
             {...otherContainerProps}
         >
-            {cards.map((card, index) => {
+            {sortedCards.map((card, index) => {
                 // Calculate position based on handStyle
                 const totalCards = cards.length;
                 let rotation = 0;
-                let offsetX = 0;
+                let offsetX: number;
                 let offsetY = 0;
 
-                if (handStyle === 'fan') {
+                if (isFanStyle) {
                     // Fan style: cards are arranged in an arc
-                    const fanAngle = Math.min(5, 40 / totalCards); // Max 5 degrees per card, or less if many cards
+                    const fanAngle = Math.min(5, 40 / totalCards);
                     rotation = (index - (totalCards - 1) / 2) * fanAngle;
-                    offsetY = Math.abs(rotation) * 2; // Cards at the edges are slightly lower
+                    // Calculate position based on the arc
+                    const multiplier =
+                        cards.length > 7
+                            ? 75
+                            : cards.length > 5
+                            ? 100
+                            : cards.length > 3
+                            ? 175
+                            : 250;
+                    const radius = cards.length * multiplier;
+                    const angleInRadians = (rotation * Math.PI) / 180;
+                    offsetX = Math.sin(angleInRadians) * radius;
+                    offsetY = -1 * ((1 - Math.cos(angleInRadians)) * radius);
                 } else {
                     // Line style: cards are arranged in a straight line with overlap
-                    const overlap = totalCards > 7 ? 80 : 40; // More overlap if many cards
+                    const overlap = 60;
                     offsetX = index * overlap;
                 }
 
@@ -89,15 +121,22 @@ export const ZoneHand: React.FC<ZoneHandProps> = ({
                     <Box
                         key={card.id}
                         sx={{
-                            position: handStyle === 'line' ? 'relative' : 'absolute',
-                            left: handStyle === 'fan' ? `calc(50% - 60px)` : undefined, // Center point for fan
+                            position: 'absolute',
+                            left: isFanStyle ? `calc(50% - 60px + ${offsetX}px)` : `${offsetX}px`,
+                            bottom: isFanStyle ? `${offsetY}px` : 0,
+                            transformOrigin: isFanStyle ? 'bottom center' : 'center',
                             zIndex: index,
-                            transform:
-                                handStyle === 'fan'
-                                    ? `translateX(${offsetX}px) translateY(${offsetY}px) rotate(${rotation}deg)`
-                                    : undefined,
-                            marginLeft:
-                                handStyle === 'line' ? (index === 0 ? 0 : '-40px') : undefined,
+                            transform: isFanStyle ? `rotate(${rotation}deg)` : 'none',
+                            '&:hover': onCardClick
+                                ? {
+                                      zIndex: 1000,
+                                      transform: isFanStyle
+                                          ? `rotate(${rotation}deg) translateY(-20px) scale(1.1)`
+                                          : 'translateY(-10px) scale(1.1)',
+                                      cursor: 'pointer',
+                                  }
+                                : undefined,
+                            transition: 'all 0.2s ease-in-out',
                             ...(cardContainerSx || {}),
                         }}
                         {...otherCardContainerProps}
@@ -105,8 +144,9 @@ export const ZoneHand: React.FC<ZoneHandProps> = ({
                         <Card
                             cardId={card.id}
                             zoneId={zone.id}
-                            rotation={rotation}
-                            offset={{ x: offsetX, y: offsetY }}
+                            CardProps={CardProps}
+                            CardBackProps={CardBackProps}
+                            onClick={onCardClick}
                         />
                     </Box>
                 );

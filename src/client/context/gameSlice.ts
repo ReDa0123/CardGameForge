@@ -108,8 +108,11 @@ const gameSlice = createSlice({
             state.networkState!.playerNickname = undefined;
         },
         leaveRoom: (state: GameState<any, any, any, any>) => {
-            state.networkState = {
-                playerId: state.networkState!.playerId,
+            return {
+                ...initialGameState,
+                networkState: {
+                    playerId: state.networkState!.playerId,
+                },
             };
         },
     },

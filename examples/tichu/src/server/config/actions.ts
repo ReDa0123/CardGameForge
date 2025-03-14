@@ -7,11 +7,12 @@ import {
     Scores,
     Combinations,
 } from '../types';
-import { DEFAULT_PLAYED_COMBINATION, ZONES } from '../constants';
+import { DEFAULT_PLAYED_COMBINATION, SPECIAL_CARDS, ZONES } from '../constants';
 import { EVERYBODY } from 'cardgameforge/server';
 
 export const tichuActions = {
     ADD_NUMBER_OF_PASSES: 'ADD_NUMBER_OF_PASSES',
+    RESET_NUMBER_OF_PASSES: 'RESET_NUMBER_OF_PASSES',
     SET_DEFAULT_CUSTOM_STATE: 'SET_DEFAULT_CUSTOM_STATE',
     SET_ORIGINAL_PLAY_ORDER: 'SET_ORIGINAL_PLAY_ORDER',
     ADD_FINISHED_PLAYER: 'ADD_FINISHED_PLAYER',
@@ -32,6 +33,7 @@ export const tichuActions = {
 };
 
 export type SetDefaultCustomStatePayload = object;
+export type ResetNumberOfPassesPayload = object;
 export type SetOriginalPlayOrderPayload = {
     playOrder: string[];
 };
@@ -447,7 +449,7 @@ export const prepareForNewRound: ActionTemplate<
     name: tichuActions.PREPARE_FOR_NEW_ROUND,
     apply: (_, ctx) => {
         const state = ctx.getState();
-        const playerIds = state.coreState.turnOrder.playOrder;
+        const playerIds = state.customState.originalPlayOrder;
         // New custom state
         const newCustomState: TichuState = {
             ...state.customState,
@@ -466,10 +468,22 @@ export const prepareForNewRound: ActionTemplate<
                 return [...acc, ...state.coreState.zones![zoneId]!.cards];
             }, [] as Card<TichuCard>[])
         );
+        const allCardsWithResetPhowenixValue = allCards.map((card) => {
+            if (card.templateId === SPECIAL_CARDS.PHOENIX) {
+                return {
+                    ...card,
+                    templateFields: {
+                        ...card.templateFields,
+                        custom: { ...card.templateFields.custom, value: undefined },
+                    },
+                } as Card<TichuCard>;
+            }
+            return card;
+        });
         const newZones = allZonesIds.reduce((acc, zoneId) => {
             acc[zoneId] = {
                 ...state.coreState.zones![zoneId]!,
-                cards: zoneId === ZONES.START_DECK ? allCards : [],
+                cards: zoneId === ZONES.START_DECK ? allCardsWithResetPhowenixValue : [],
             };
             return acc;
         }, {} as { [zoneId: string]: Zone<any, TichuCard> });
@@ -485,6 +499,20 @@ export const prepareForNewRound: ActionTemplate<
             customState: newCustomState,
             coreState: { ...state.coreState, zones: newZones, turnOrder: newTurnOrder },
         };
+    },
+};
+
+export const resetNumberOfPasses: ActionTemplate<
+    ResetNumberOfPassesPayload,
+    TichuState,
+    TichuGameSettings,
+    any,
+    TichuCard
+> = {
+    name: tichuActions.RESET_NUMBER_OF_PASSES,
+    apply: (_, ctx) => {
+        const state = ctx.getState();
+        return { ...state, customState: { ...state.customState, numberOfPasses: 0 } };
     },
 };
 
@@ -506,4 +534,6 @@ export const allTichuActions = [
     clearHasSentCards,
     addHasCalledTichu,
     clearHasCalledTichu,
+    resetNumberOfPasses,
+    prepareForNewRound,
 ] as ActionTemplate<any, TichuState, TichuGameSettings, any, TichuCard>[];

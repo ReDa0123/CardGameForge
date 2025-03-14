@@ -70,3 +70,14 @@ export const isTurnEnd = (state: GameState<TichuState, TichuGameSettings, any, T
     const didTurnEndNormally = finishedPlayers.length === 3;
     return didBothTeammatesFinish || didTurnEndNormally;
 };
+
+export const getNicknamesForTeamPlayers = (
+    teamId: string,
+    state: GameState<TichuState, TichuGameSettings, any, TichuCard>
+) => {
+    const players = state.coreState.teams![teamId];
+    const playersOfTheTeam = state.networkState!.players.filter((player) =>
+        players.includes(player.playerId)
+    );
+    return playersOfTheTeam.map((player) => player.playerNickname).join(', ');
+};

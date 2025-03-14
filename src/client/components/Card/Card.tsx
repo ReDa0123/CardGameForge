@@ -8,9 +8,9 @@ type CardProps = {
     cardId: string;
     zoneId: string;
     isFaceDown?: boolean;
-    rotation?: number;
-    offset?: { x: number; y: number };
     onClick?: (cardId: string, zoneId: string) => void;
+    CardBackProps?: any;
+    CardProps?: any;
 };
 
 /**
@@ -20,16 +20,17 @@ type CardProps = {
  * @param cardId - The id of the card
  * @param zoneId - The id of the zone
  * @param isFaceDown - Whether the card is face down
- * @param rotation - The rotation of the card
- * @param offset - The offset of the card
+ * @param CardBackProps - The props for the card back
+ * @param onClick - The function to call when the card is clicked
+ * @param CardProps - The props for the card
  */
 export const Card: React.FC<CardProps> = ({
     cardId,
     zoneId,
     isFaceDown: forceFaceDown,
-    rotation = 0,
-    offset = { x: 0, y: 0 },
     onClick,
+    CardBackProps,
+    CardProps,
 }) => {
     const zone = useSelector(getZoneById(zoneId));
     const card = zone?.cards!.find((card) => card.id === cardId);
@@ -61,18 +62,19 @@ export const Card: React.FC<CardProps> = ({
             sx={{
                 width: '120px',
                 height: '168px', // Standard card ratio 2.5:3.5
-                backgroundColor: isFaceDown ? '#6b7280' : 'white',
+                backgroundColor: 'background.paper',
                 borderRadius: 2,
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'relative',
-                transform: `rotate(${rotation}deg) translate(${offset.x}px, ${offset.y}px)`,
-                cursor: 'pointer',
+                cursor: onClick ? 'pointer' : 'default',
                 transition: 'transform 0.2s ease-in-out',
                 userSelect: 'none',
                 overflow: 'hidden',
+                ...(CardProps?.sx ?? {}),
             }}
             onClick={handleClick}
+            {...CardProps}
         >
             {isFaceDown ? (
                 // Card back
@@ -80,15 +82,17 @@ export const Card: React.FC<CardProps> = ({
                     sx={{
                         width: '100%',
                         height: '100%',
-                        backgroundColor: '#6b7280',
+                        backgroundColor: 'text.primary',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        color: '#fff',
+                        color: 'primary.contrastText',
                         fontWeight: 'bold',
+                        ...(CardBackProps?.sx ?? {}),
                     }}
+                    {...CardBackProps}
                 >
-                    Card
+                    {CardBackProps?.children}
                 </Box>
             ) : (
                 // Card front - use the display registry component

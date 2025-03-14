@@ -51,14 +51,16 @@ const disconnectFromRoom =
         // Remove the game data if it exists
         if (roomData) {
             const otherPlayersInRoom = io.sockets.adapter.rooms.get(roomId);
+            removeRoomGameData(roomId);
+            io.to(roomId).emit(events.rooms.RESET_NETWORK_STATE);
             if (otherPlayersInRoom) {
                 for (const otherPlayerId of otherPlayersInRoom) {
                     const otherPlayer = io.sockets.sockets.get(otherPlayerId) as Socket;
                     otherPlayer.roomId = undefined;
                     otherPlayer.nickname = undefined;
+                    otherPlayer.leave(roomId);
                 }
             }
-            removeRoomGameData(roomId);
 
             if (networkState) {
                 io.to(roomId).emit(events.rooms.RESET_NETWORK_STATE);

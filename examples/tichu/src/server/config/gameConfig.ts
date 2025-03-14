@@ -17,6 +17,8 @@ import {
     Teams,
     TurnOrder,
     EVERYBODY,
+    AppendHistoryPayload,
+    historyRecordsTypes,
 } from 'cardgameforge/server';
 import {
     DEFAULT_PLAYED_COMBINATION,
@@ -39,6 +41,8 @@ import {
     AddNumberOfPassesPayload,
     ResetPlayedCombinationPayload,
     SetPlayedCombinationPayload,
+    SetScorePayload,
+    ResetNumberOfPassesPayload,
 } from './actions';
 import {
     findPlayersHandId,
@@ -50,6 +54,7 @@ import {
     isDragonInPlayedCards,
     isTurnEnd,
     getNextPlayerNotFinished,
+    getNicknamesForTeamPlayers,
 } from './utils';
 import { getCardCombination } from '../combinationResolver/getCardCombination';
 import { moves } from './moves';
@@ -57,7 +62,7 @@ const tichuInitialCustomState: TichuState = {
     numberOfPasses: 0,
     finishedPlayers: [],
     calledTichu: {},
-    score: {},
+    score: { team1: { teamId: 'team1', score: 0 }, team2: { teamId: 'team2', score: 0 } },
     playedCombination: DEFAULT_PLAYED_COMBINATION,
     sentCards: {},
     hasSentCards: [],
@@ -79,20 +84,20 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
         const team1Score = state.customState.score.team1!;
         const team2Score = state.customState.score.team2!;
         const scoreToWin = state.gameOptions.scoreToWin;
-        let wonId: string | undefined = undefined;
+        let wonName: string | undefined = undefined;
         if (team1Score.score >= scoreToWin && team1Score.score > team2Score.score) {
-            wonId = team1Score.teamId;
+            wonName = getNicknamesForTeamPlayers(team1Score.teamId, state);
         }
 
         if (team2Score.score >= scoreToWin && team2Score.score > team1Score.score) {
-            wonId = team2Score.teamId;
+            wonName = getNicknamesForTeamPlayers(team2Score.teamId, state);
         }
 
-        if (wonId) {
+        if (wonName) {
             return {
                 isTie: false,
-                winner: wonId,
-                reason: `${wonId} has more than ${scoreToWin} points and won teh game.`,
+                winner: wonName,
+                reason: `${wonName} has more than ${scoreToWin} points and won the game.`,
             };
         }
 
@@ -105,7 +110,8 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
         return null;
     },
     afterGameEnd: (ctx) => {
-        ctx.exportHistory('/', 'TichuTest');
+        console.log('Exporting history');
+        ctx.exportHistory('./exports', 'TichuTest');
         return ctx.getState();
     },
     defaultCustomGameOptions: {
@@ -128,8 +134,14 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
             { [team1Name]: [] as string[], [team2Name]: [] as string[] }
         );
         ctx.dispatchAction<SetTeamsPayload>(actionTypes.SET_TEAMS, teams, meta);
-        state = ctx.getState();
 
+        // Set team names in score
+        const score = {
+            team1: { teamId: team1Name, score: 0 },
+            team2: { teamId: team2Name, score: 0 },
+        };
+        ctx.dispatchAction<SetScorePayload>(tichuActions.SET_SCORE, { score }, meta);
+        state = ctx.getState();
         // Put all cards in the deck, shuffle and deal 8 cards to each player
         const allCards: Card<TichuCard>[] = [];
 
@@ -253,7 +265,7 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                 // Set hasCalledTichu who called big tichu
                 const playerIds = state.coreState.turnOrder.playOrder;
                 const bigTichuPlayersId = playerIds.filter(
-                    (id) => !state.customState.calledTichu[id]
+                    (id) => !!state.customState.calledTichu[id]
                 );
                 for (const playerId of bigTichuPlayersId) {
                     ctx.dispatchAction<AddHasCalledTichuPayload>(
@@ -262,6 +274,14 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                         meta
                     );
                 }
+                if (bigTichuPlayersId.length === 4) {
+                    ctx.dispatchAction<ChangePhasePayload>(
+                        actionTypes.CHANGE_PHASE,
+                        { phase: GAME_PHASES.SEND_CARDS },
+                        meta
+                    );
+                }
+
                 return payload;
             }
         );
@@ -279,7 +299,7 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                     return payload;
                 }
                 // Sending cards
-                const playerIds = state.coreState.turnOrder.playOrder;
+                const playerIds = state.customState.originalPlayOrder;
                 const sentCards = state.customState.sentCards;
                 const zones = Object.values(state.coreState.zones);
                 for (const playerId of playerIds) {
@@ -350,9 +370,16 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                 }
                 const state = ctx.getState();
                 const playerIdWhoWonCollected = state.customState.playedCombination.playedBy!;
+                ctx.dispatchAction<ResetNumberOfPassesPayload>(
+                    tichuActions.RESET_NUMBER_OF_PASSES,
+                    {},
+                    meta
+                );
+                const finishedIncludeWinner =
+                    state.customState.finishedPlayers.includes(playerIdWhoWonCollected);
                 ctx.dispatchAction<SetActivePlayerPayload>(
                     actionTypes.SET_ACTIVE_PLAYER,
-                    { playerId: playerIdWhoWonCollected },
+                    { playerId: playerIdWhoWonCollected, force: finishedIncludeWinner },
                     meta
                 );
                 return payload;
@@ -370,6 +397,7 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                 ) {
                     return payload;
                 }
+                let state = ctx.getState();
                 if (isTurnEnd(state)) {
                     return { phase: GAME_PHASES.TURN_END };
                 }
@@ -378,6 +406,7 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                     {},
                     meta
                 );
+                state = ctx.getState();
                 const activePlayer = state.coreState.turnOrder.activePlayer;
                 const finishedPlayers = state.customState.finishedPlayers;
                 if (finishedPlayers.includes(activePlayer)) {
@@ -398,7 +427,7 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
             }
         );
 
-        // TURN_END - Hook for resolving called tichus, adding scores and reseting state after turn ends
+        // TURN_END - Hook for resolving called tichus, adding scores and resetting state after turn ends
         ctx.addAfterHook<ChangePhasePayload>(
             actionTypes.CHANGE_PHASE,
             'setScoreAndResetState',
@@ -417,15 +446,29 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                         const didPlayerFinishFirst =
                             state.customState.finishedPlayers[0] === playerId;
                         const playersTeamId = playerTeamMap[playerId];
+                        const score = didPlayerFinishFirst ? points : -points;
                         ctx.dispatchAction<AddScoreForTeamPayload>(
                             tichuActions.ADD_SCORE_FOR_TEAM,
                             {
                                 teamId: playersTeamId,
-                                score: didPlayerFinishFirst ? points : -points,
+                                score,
                             },
                             meta
                         );
-                        // TODO: Add message to history so that it will be displayed in the UI
+                        const playerNickname = state.networkState!.players.find(
+                            (p) => p.playerId === playerId
+                        )!.playerNickname;
+                        ctx.dispatchAction<AppendHistoryPayload>(
+                            actionTypes.APPEND_HISTORY,
+                            {
+                                recordType: historyRecordsTypes.SYSTEM,
+                                message: `Player ${playerNickname} ${
+                                    didPlayerFinishFirst ? 'completed' : 'failed'
+                                } their Tichu, so their team got ${score} points`,
+                                meta,
+                            },
+                            meta
+                        );
                     }
                 }
 
@@ -435,7 +478,13 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                 const [team2Id, team2Players] = Object.entries(state.coreState.teams!)[1];
                 const finishedPlayers = state.customState.finishedPlayers;
                 const sortedFinishedPlayers = [...finishedPlayers].sort();
-                if (sortedFinishedPlayers === [...team1Players].sort()) {
+                const sortedTeam1Players = [...team1Players].sort();
+                const sortedTeam2Players = [...team2Players].sort();
+                if (
+                    sortedFinishedPlayers.length === 2 &&
+                    sortedFinishedPlayers[0] === sortedTeam1Players[0] &&
+                    sortedFinishedPlayers[1] === sortedTeam1Players[1]
+                ) {
                     ctx.dispatchAction<AddScoreForTeamPayload>(
                         tichuActions.ADD_SCORE_FOR_TEAM,
                         {
@@ -444,7 +493,21 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                         },
                         meta
                     );
-                } else if (sortedFinishedPlayers === [...team2Players].sort()) {
+                    ctx.dispatchAction<AppendHistoryPayload>(
+                        actionTypes.APPEND_HISTORY,
+                        {
+                            recordType: historyRecordsTypes.SYSTEM,
+                            message:
+                                'Both teammatess finished first and second, so they got 200 points',
+                            meta,
+                        },
+                        meta
+                    );
+                } else if (
+                    sortedFinishedPlayers.length === 2 &&
+                    sortedFinishedPlayers[0] === sortedTeam2Players[0] &&
+                    sortedFinishedPlayers[1] === sortedTeam2Players[1]
+                ) {
                     ctx.dispatchAction<AddScoreForTeamPayload>(
                         tichuActions.ADD_SCORE_FOR_TEAM,
                         {
@@ -453,18 +516,27 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                         },
                         meta
                     );
+                    ctx.dispatchAction<AppendHistoryPayload>(
+                        actionTypes.APPEND_HISTORY,
+                        {
+                            recordType: historyRecordsTypes.SYSTEM,
+                            message:
+                                'Both teammatess finished first and second, so they got 200 points',
+                            meta,
+                        },
+                        meta
+                    );
                 } else {
                     // Move cards from the last players hand and collected pile to the player who finished first
                     const playerIds = state.coreState.turnOrder.playOrder;
                     const zones = Object.values(state.coreState.zones);
-                    const lastPlayerId = playerIds.filter((id) => !finishedPlayers.includes(id))[0];
+                    const lastPlayerId = playerIds.find((id) => !finishedPlayers.includes(id))!;
                     const lastPlayerHandId = findPlayersHandId(zones, lastPlayerId);
                     const lastPlayerCollectedPileId = findPlayersCollectedPileId(
                         zones,
                         lastPlayerId
                     );
                     const firstPlayerId = finishedPlayers[0];
-                    const firstPlayerHandId = findPlayersHandId(zones, firstPlayerId);
                     const firstPlayerCollectedPileId = findPlayersCollectedPileId(
                         zones,
                         firstPlayerId
@@ -474,7 +546,7 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                         actionTypes.MOVE_CARDS_FROM_ZONE,
                         {
                             fromZoneId: lastPlayerHandId,
-                            toZoneId: firstPlayerHandId,
+                            toZoneId: firstPlayerCollectedPileId,
                         },
                         meta
                     );
@@ -491,27 +563,44 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                         actionTypes.MOVE_CARDS_FROM_ZONE,
                         {
                             fromZoneId: ZONES.PLAYED_CARDS,
-                            toZoneId: firstPlayerHandId,
+                            toZoneId: firstPlayerCollectedPileId,
                         },
                         meta
                     );
 
                     state = ctx.getState();
-                    const playerTeamMap = getPlayerTeamMap(state.coreState.teams!);
                     // Add score to finished players teams
                     for (const playerId of finishedPlayers) {
                         const teamId = playerTeamMap[playerId];
+                        const zones = Object.values(state.coreState.zones);
                         const collectedPileOfPlayer = findPlayersCollectedPileCards(
                             zones,
                             playerId
                         );
                         const score = calculateScoreFromCollected(collectedPileOfPlayer);
+
                         ctx.dispatchAction<AddScoreForTeamPayload>(
                             tichuActions.ADD_SCORE_FOR_TEAM,
                             { teamId, score },
                             meta
                         );
                     }
+                }
+                state = ctx.getState();
+                for (const teamId of Object.keys(state.coreState.teams!)) {
+                    const nicknamesOfTheTeamPlayers = getNicknamesForTeamPlayers(teamId, state);
+                    const score = Object.values(state.customState.score).find(
+                        (score) => score.teamId === teamId
+                    )!.score;
+                    ctx.dispatchAction<AppendHistoryPayload>(
+                        actionTypes.APPEND_HISTORY,
+                        {
+                            recordType: historyRecordsTypes.SYSTEM,
+                            message: `Team ${nicknamesOfTheTeamPlayers} got ${score} points`,
+                            meta,
+                        },
+                        meta
+                    );
                 }
                 state = ctx.getState();
                 const didGameEnd = !state.coreState.gameInProgress;
@@ -580,7 +669,7 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                 const state = ctx.getState();
                 const fromZone = state.coreState.zones[payload.fromZoneId]!;
                 const toZone = state.coreState.zones[payload.toZoneId]!;
-                if (fromZone.type !== ZONES.HAND || toZone.type !== ZONES.PLAYED_CARDS) {
+                if (fromZone.type !== ZONES.HAND || toZone.id !== ZONES.PLAYED_CARDS) {
                     return payload;
                 }
                 // Resolve new combination
@@ -589,11 +678,11 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                     : [payload.cardIds];
                 const isPlayedCardDog = playedCardIds[0].includes(SPECIAL_CARDS.DOG);
                 if (!isPlayedCardDog) {
-                    const playedCards = state.coreState.zones[ZONES.PLAYED_CARDS].cards;
+                    const playedCards = state.coreState.zones[ZONES.PLAYED_CARDS].cards.filter(
+                        (card) => playedCardIds.includes(card.id)
+                    );
                     const playerId = state.coreState.turnOrder.activePlayer;
-                    const currentCombination = state.customState.playedCombination;
-                    const combinationType =
-                        currentCombination.type ?? getCardCombination(fromZone.cards)!;
+                    const combinationType = getCardCombination(playedCards)!;
                     ctx.dispatchAction<SetPlayedCombinationPayload>(
                         tichuActions.SET_PLAYED_COMBINATION,
                         {
@@ -645,11 +734,11 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                     const newPlayOrder = currentPlayOrder.filter(
                         (id) => !finishedPlayers.includes(id)
                     );
-                    const nextPlayer = currentTurnOrder.activePlayer;
-                    const newActivePlayerIndex = newPlayOrder.indexOf(nextPlayer);
+                    const newActivePlayer = currentTurnOrder.nextPlayer;
+                    const newActivePlayerIndex = newPlayOrder.indexOf(newActivePlayer);
                     const newTurnOrder: TurnOrder = {
                         playOrder: newPlayOrder,
-                        activePlayer: nextPlayer,
+                        activePlayer: newActivePlayer,
                         activePlayerIndex: newActivePlayerIndex,
                         nextPlayer: newPlayOrder[(newActivePlayerIndex + 1) % newPlayOrder.length],
                     };
@@ -671,8 +760,11 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
             (payload, ctx, meta) => {
                 const state = ctx.getState();
                 const numberOfPasses = state.customState.numberOfPasses;
-                const playOrderCount = state.coreState.turnOrder.playOrder.length;
-                if (numberOfPasses >= playOrderCount - 1) {
+                const playOrder = state.coreState.turnOrder.playOrder;
+                const playOrderCount = playOrder.length;
+                const lastPlayedCombinationPlayerId = state.customState.playedCombination.playedBy!;
+                const subtract = playOrder.includes(lastPlayedCombinationPlayerId) ? 1 : 0;
+                if (numberOfPasses >= playOrderCount - subtract) {
                     const playedCardsContainDragon = isDragonInPlayedCards(state);
                     if (playedCardsContainDragon) {
                         ctx.dispatchAction<ChangePhasePayload>(
@@ -682,19 +774,39 @@ export const tichuGameConfig: GameConfig<TichuState, TichuGameSettings, any, Tic
                         );
                     } else {
                         const playerIdWhoWonDeck = state.customState.playedCombination.playedBy!;
+                        const playerNicknameWhoWonDeck = state.networkState!.players.find(
+                            (p) => p.playerId === playerIdWhoWonDeck
+                        )!.playerNickname;
                         const zones = Object.values(state.coreState.zones);
-                        const playerHandId = findPlayersHandId(zones, playerIdWhoWonDeck);
+                        const playerCollectedPileId = findPlayersCollectedPileId(
+                            zones,
+                            playerIdWhoWonDeck
+                        );
                         ctx.dispatchAction<MoveCardsFromZonePayload>(
                             actionTypes.MOVE_CARDS_FROM_ZONE,
                             {
                                 fromZoneId: ZONES.PLAYED_CARDS,
-                                toZoneId: playerHandId,
+                                toZoneId: playerCollectedPileId,
                             },
                             meta
                         );
                         ctx.dispatchAction<ResetPlayedCombinationPayload>(
                             tichuActions.RESET_PLAYED_COMBINATION,
                             {},
+                            meta
+                        );
+                        ctx.dispatchAction<ResetNumberOfPassesPayload>(
+                            tichuActions.RESET_NUMBER_OF_PASSES,
+                            {},
+                            meta
+                        );
+                        ctx.dispatchAction<AppendHistoryPayload>(
+                            actionTypes.APPEND_HISTORY,
+                            {
+                                recordType: historyRecordsTypes.SYSTEM,
+                                message: `${playerNicknameWhoWonDeck} won the deck`,
+                                meta,
+                            },
                             meta
                         );
                     }

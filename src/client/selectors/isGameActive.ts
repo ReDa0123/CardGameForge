@@ -6,4 +6,5 @@ import { ReduxState } from '../types';
  * @returns True if the game is active, false otherwise
  */
 export const isGameActive = (state: ReduxState<any, any, any, any>) =>
-    state.game.coreState.gameInProgress && !!state.game.networkState?.roomId;
+    (state.game.coreState.gameInProgress || !!state.game.coreState.endResult) &&
+    !!state.game.networkState?.roomId;

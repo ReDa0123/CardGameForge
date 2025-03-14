@@ -4,10 +4,13 @@ import { actionTypes } from './actionTypes';
 
 export type SetActivePlayerPayload = {
     playerId: string | 'EVERYBODY';
+    force?: boolean;
 };
 
 /**
  * Action to set a new active player
+ * Payload - An object with the ID of the new active player and an optional flag to force the change
+ * even if the player is not in the play order
  */
 const setActivePlayer: ActionTemplate<SetActivePlayerPayload> = {
     name: actionTypes.SET_ACTIVE_PLAYER,
@@ -22,6 +25,18 @@ const setActivePlayer: ActionTemplate<SetActivePlayerPayload> = {
                     turnOrder: {
                         ...state.coreState.turnOrder,
                         activePlayer: EVERYBODY,
+                    },
+                },
+            };
+        }
+        if (payload.force) {
+            return {
+                ...state,
+                coreState: {
+                    ...state.coreState,
+                    turnOrder: {
+                        ...state.coreState.turnOrder,
+                        activePlayer: newPlayerId,
                     },
                 },
             };

@@ -1,18 +1,27 @@
 import React from 'react';
 import { Theme } from '@mui/material';
+import { Card, Zone } from './gameObjects';
 
 export type SelectCardPayload = {
     cardId: string;
     zoneId: string;
 };
 
+export type CardComponent<
+    CustomCard extends Record<string, any> = any,
+    CustomZone extends Record<string, any> = any
+> = React.ComponentType<{
+    card: Card<CustomCard>;
+    zone: Zone<CustomZone, CustomCard>;
+}>;
+
 export type DisplayRegistry = {
-    default: React.ComponentType<any>;
+    default: CardComponent;
     displayTypes?: {
         [displayType: string]: {
-            default: React.ComponentType<any>;
+            default: CardComponent;
             zones?: {
-                [zoneId: string]: React.ComponentType<any>;
+                [zoneId: string]: CardComponent;
             };
         };
     };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Zone as ZoneType } from '../../types';
 import { Card } from '../Card';
 import { Box, Paper, Typography, Chip, BoxProps, ChipProps } from '@mui/material';
@@ -9,6 +9,10 @@ type ZonePileProps = {
     containerProps?: Omit<BoxProps, 'sx'> & { sx?: BoxProps['sx'] };
     cardContainerProps?: Omit<BoxProps, 'sx'> & { sx?: BoxProps['sx'] };
     cardCountProps?: Omit<ChipProps, 'label' | 'size' | 'color' | 'sx'> & { sx?: ChipProps['sx'] };
+    CardProps?: any;
+    CardBackProps?: any;
+    onPileClick?: (zoneId: string) => void;
+    allFaceDown?: boolean;
 };
 
 /**
@@ -19,6 +23,10 @@ type ZonePileProps = {
  * @param containerProps - The props for the container
  * @param cardContainerProps - The props for the card container
  * @param cardCountProps - The props for the card count
+ * @param CardProps - The props for the card
+ * @param CardBackProps - The props for the card back
+ * @param onPileClick - The function to call when the pile is clicked
+ * @param allFaceDown - Whether all cards should be face down
  */
 export const ZonePile: React.FC<ZonePileProps> = ({
     zone,
@@ -26,9 +34,48 @@ export const ZonePile: React.FC<ZonePileProps> = ({
     containerProps,
     cardContainerProps,
     cardCountProps,
+    CardProps,
+    CardBackProps,
+    onPileClick,
+    allFaceDown = false,
 }) => {
-    const cards = zone.cards;
+    const cards = useMemo(() => zone.cards, [zone.cards]);
     const cardCount = cards.length;
+
+    // Store random positions in a ref to keep them stable across renders
+    const positionsRef = useRef<
+        Map<string, { rotation: number; offsetX: number; offsetY: number }>
+    >(new Map());
+
+    // Memoize the top cards and use stable random positions
+    const memoizedTopCards = useMemo(() => {
+        const visibleCardCount = Math.min(cardCount, topCardsCount);
+        const topCards = cards.slice(-visibleCardCount);
+
+        // Clear positions for cards that are no longer in the top cards
+        const currentCardIds = new Set(topCards.map((card) => card.id));
+        Array.from(positionsRef.current.keys()).forEach((cardId) => {
+            if (!currentCardIds.has(cardId)) {
+                positionsRef.current.delete(cardId);
+            }
+        });
+
+        return topCards.map((card) => {
+            // Reuse existing position or generate new one
+            if (!positionsRef.current.has(card.id)) {
+                positionsRef.current.set(card.id, {
+                    rotation: Math.random() * 90 - 45,
+                    offsetX: Math.random() * 40 - 20,
+                    offsetY: Math.random() * 40 - 20,
+                });
+            }
+
+            return {
+                card,
+                position: positionsRef.current.get(card.id)!,
+            };
+        });
+    }, [cards, cardCount, topCardsCount]);
 
     if (cardCount === 0) {
         return (
@@ -53,12 +100,6 @@ export const ZonePile: React.FC<ZonePileProps> = ({
         );
     }
 
-    // Determine how many cards to show (limited by topCardsCount)
-    const visibleCardCount = Math.min(cardCount, topCardsCount);
-
-    // Get the top cards from the pile
-    const topCards = cards.slice(0, visibleCardCount);
-
     const { sx: containerSx, ...otherContainerProps } = containerProps || {};
     const { sx: cardCountSx, ...otherCardCountProps } = cardCountProps || {};
 
@@ -70,18 +111,11 @@ export const ZonePile: React.FC<ZonePileProps> = ({
                 height: '200px',
                 ...(containerSx || {}),
             }}
+            onClick={() => onPileClick?.(zone.id)}
             {...otherContainerProps}
         >
-            {topCards.map((card, index) => {
-                // Generate random rotation and offset for each card to create a messy pile effect
-                const rotation = Math.random() * 30 - 15; // Random rotation between -15 and 15 degrees
-                const offsetX = Math.random() * 20 - 10; // Random X offset between -10 and 10 pixels
-                const offsetY = Math.random() * 20 - 10; // Random Y offset between -10 and 10 pixels
-
-                // Determine if the card is face up or face down
-                // For a pile, typically the top card is face up and others might be face down
-                const isFaceDown = index !== topCards.length - 1;
-
+            {memoizedTopCards.map(({ card, position }, index) => {
+                const isFaceDown = allFaceDown;
                 const { sx: cardContainerSx, ...otherCardContainerProps } =
                     cardContainerProps || {};
 
@@ -92,7 +126,7 @@ export const ZonePile: React.FC<ZonePileProps> = ({
                             position: 'absolute',
                             top: '50%',
                             left: '50%',
-                            transform: `translate(-50%, -50%) translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg)`,
+                            transform: `translate(-50%, -50%) translate(${position.offsetX}px, ${position.offsetY}px) rotate(${position.rotation}deg)`,
                             zIndex: index,
                             ...(cardContainerSx || {}),
                         }}
@@ -102,8 +136,8 @@ export const ZonePile: React.FC<ZonePileProps> = ({
                             cardId={card.id}
                             zoneId={zone.id}
                             isFaceDown={isFaceDown}
-                            rotation={rotation}
-                            offset={{ x: offsetX, y: offsetY }}
+                            CardProps={CardProps}
+                            CardBackProps={CardBackProps}
                         />
                     </Box>
                 );
@@ -119,7 +153,7 @@ export const ZonePile: React.FC<ZonePileProps> = ({
                         position: 'absolute',
                         bottom: '5px',
                         right: '5px',
-                        zIndex: visibleCardCount,
+                        zIndex: memoizedTopCards.length,
                         ...(cardCountSx || {}),
                     }}
                     {...otherCardCountProps}

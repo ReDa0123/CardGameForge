@@ -1,5 +1,5 @@
 import { ReduxState } from '../types';
-
+import { memoizeWithIdentity } from './utils';
 /**
  * Selector to get the game options from the redux state.
  * @param state - The redux state
@@ -13,7 +13,8 @@ export const getGameOptions = (state: ReduxState<any, any, any, any>) => state.g
  * @param state - The redux state
  * @returns The game options
  */
-export const getGameOptionsValue =
+export const getGameOptionsValue = memoizeWithIdentity(
     <T>(key: string) =>
-    (state: ReduxState<any, any, any, any>): T | undefined =>
-        state.game.gameOptions[key];
+        (state: ReduxState<any, any, any, any>): T | undefined =>
+            state.game.gameOptions[key]
+);

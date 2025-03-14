@@ -13,8 +13,8 @@ type Score = {
 };
 
 export type Scores = {
-    team1?: Score;
-    team2?: Score;
+    team1: Score;
+    team2: Score;
 };
 
 export type TypeOfTichu = 'BIG' | 'SMALL' | false;

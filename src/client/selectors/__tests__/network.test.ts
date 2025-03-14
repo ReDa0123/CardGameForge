@@ -1,4 +1,11 @@
-import { getNetworkInfo, getRoomPlayersCount, getRoomId, isInLobby } from '../network';
+import {
+    getNetworkInfo,
+    getRoomPlayersCount,
+    getRoomId,
+    isInLobby,
+    getPlayerNicknames,
+    getPlayerIds,
+} from '../network';
 import { ReduxState, GameState } from '../../types';
 
 describe('network selectors', () => {
@@ -118,6 +125,61 @@ describe('network selectors', () => {
             };
             const result = isInLobby(emptyState as ReduxState<any, any, any, any>);
             expect(result).toBe(false);
+        });
+    });
+
+    describe('getPlayerIds', () => {
+        it('should return the player ids', () => {
+            const result = getPlayerIds(mockState as ReduxState<any, any, any, any>);
+            expect(result).toEqual(['player-123', 'player-456', 'player-789']);
+        });
+
+        it('should return empty array when players array is undefined', () => {
+            const stateWithoutPlayers: Partial<ReduxState<any, any, any, any>> = {
+                game: {
+                    ...(mockGameState as GameState<any, any, any, any>),
+                    networkState: {
+                        players: [],
+                        roomId: 'room-123',
+                    },
+                },
+            };
+            const result = getPlayerIds(stateWithoutPlayers as ReduxState<any, any, any, any>);
+            expect(result).toEqual([]);
+        });
+
+        it('should return empty array when network state is undefined', () => {
+            const emptyState: Partial<ReduxState<any, any, any, any>> = {
+                game: {
+                    ...(mockGameState as GameState<any, any, any, any>),
+                    networkState: null,
+                },
+            };
+            const result = getPlayerIds(emptyState as ReduxState<any, any, any, any>);
+            expect(result).toEqual([]);
+        });
+    });
+
+    describe('getPlayerNicknames', () => {
+        it('should return the player nicknames', () => {
+            const result = getPlayerNicknames(mockState as ReduxState<any, any, any, any>);
+            expect(result).toEqual(['Player 1', 'Player 2', 'Player 3']);
+        });
+
+        it('should return empty array when players array is undefined', () => {
+            const stateWithoutPlayers: Partial<ReduxState<any, any, any, any>> = {
+                game: {
+                    ...(mockGameState as GameState<any, any, any, any>),
+                    networkState: {
+                        players: [],
+                        roomId: 'room-123',
+                    },
+                },
+            };
+            const result = getPlayerNicknames(
+                stateWithoutPlayers as ReduxState<any, any, any, any>
+            );
+            expect(result).toEqual([]);
         });
     });
 });

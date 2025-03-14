@@ -1,10 +1,13 @@
 import { GAME_PHASES, MOVES, SPECIAL_CARDS, ZONES } from '../constants';
 import { TichuCard, TichuGameSettings, TichuState, TypeOfTichu } from '../types';
-import { findPlayersCollectedPileId, findPlayersHandId } from './utils';
+import { findPlayersCollectedPileId, findPlayersHandId, isTurnEnd } from './utils';
 import {
     actionTypes,
+    Card,
+    ChangeCardPayload,
     ChangePhasePayload,
     ChangeZonePayload,
+    EndTurnPayload,
     MoveCardsFromZonePayload,
     MoveDefinition,
 } from 'cardgameforge/server';
@@ -18,10 +21,12 @@ import {
     AddHasCalledTichuPayload,
     AddHasSentCardsPayload,
     SetSentCardsForPlayerPayload,
+    ResetNumberOfPassesPayload,
 } from './actions';
 
 export type PlayCardsPayload = {
     cardIds: string[];
+    phoenixValue?: number;
 };
 
 export type SendDeckPayload = {
@@ -45,7 +50,7 @@ const playCardMove: MoveDefinition<
 > = {
     name: MOVES.PLAY_CARDS,
     allowedPhases: [GAME_PHASES.PLAY_CARDS],
-    canExecute: ({ cardIds }, ctx, meta) => {
+    canExecute: ({ cardIds, phoenixValue }, ctx, meta) => {
         const playerId = meta.playerId!;
         const state = ctx.getState();
         const zones = state.coreState.zones;
@@ -60,12 +65,16 @@ const playCardMove: MoveDefinition<
             return { canExecute: false, reason: 'Cards not in players hand' };
         }
 
-        const playedCards = playersHandCards.filter((card) => cardIds.includes(card.id));
+        let playedCards = playersHandCards.filter((card) => cardIds.includes(card.id));
         const dogCard = playedCards.find((card) => card.templateId === SPECIAL_CARDS.DOG);
         const dragonCard = playedCards.find((card) => card.templateId === SPECIAL_CARDS.DRAGON);
+        const phoenixCard = playedCards.find((card) => card.templateId === SPECIAL_CARDS.PHOENIX);
+        if (phoenixCard && !phoenixValue) {
+            return { canExecute: false, reason: 'Phoenix card value not set' };
+        }
         if (dogCard) {
             return dogCard.templateFields.moves![MOVES.PLAY_CARDS]!.canExecute!(
-                { cardIds: [dogCard.id] },
+                { cardIds },
                 ctx,
                 dogCard.id,
                 meta
@@ -73,10 +82,40 @@ const playCardMove: MoveDefinition<
         }
         if (dragonCard) {
             return dragonCard.templateFields.moves![MOVES.PLAY_CARDS]!.canExecute!(
-                { cardIds: [dragonCard.id] },
+                { cardIds },
                 ctx,
                 dragonCard.id,
                 meta
+            );
+        }
+        if (phoenixCard) {
+            ctx.dispatchAction<ChangeCardPayload>(
+                actionTypes.CHANGE_CARD,
+                {
+                    cardId: phoenixCard.id,
+                    zoneId: playersHandId,
+                    cardChanges: {
+                        templateFields: {
+                            ...phoenixCard.templateFields,
+                            custom: {
+                                ...phoenixCard.templateFields.custom,
+                                value: phoenixValue,
+                            },
+                        },
+                    },
+                },
+                meta
+            );
+            playedCards = playedCards.map((card) =>
+                card.id === phoenixCard.id
+                    ? ({
+                          ...phoenixCard,
+                          templateFields: {
+                              ...phoenixCard.templateFields,
+                              custom: { ...phoenixCard.templateFields.custom, value: phoenixValue },
+                          },
+                      } as Card<TichuCard>)
+                    : card
             );
         }
         const currentCombination = state.customState.playedCombination;
@@ -84,6 +123,25 @@ const playCardMove: MoveDefinition<
         const playedCombination = getCardCombination(playedCards);
         const isValidCombination = !!playedCombination;
         if (!isValidCombination) {
+            if (phoenixCard) {
+                ctx.dispatchAction<ChangeCardPayload>(
+                    actionTypes.CHANGE_CARD,
+                    {
+                        cardId: phoenixCard.id,
+                        zoneId: playersHandId,
+                        cardChanges: {
+                            templateFields: {
+                                ...phoenixCard.templateFields,
+                                custom: {
+                                    ...phoenixCard.templateFields.custom,
+                                    value: undefined,
+                                },
+                            },
+                        },
+                    },
+                    meta
+                );
+            }
             return { canExecute: false, reason: 'Invalid combination played' };
         }
         if (!currentCombinationType) {
@@ -95,6 +153,25 @@ const playCardMove: MoveDefinition<
             currentCombinationType
         );
         if (!canBePlayed) {
+            if (phoenixCard) {
+                ctx.dispatchAction<ChangeCardPayload>(
+                    actionTypes.CHANGE_CARD,
+                    {
+                        cardId: phoenixCard.id,
+                        zoneId: playersHandId,
+                        cardChanges: {
+                            templateFields: {
+                                ...phoenixCard.templateFields,
+                                custom: {
+                                    ...phoenixCard.templateFields.custom,
+                                    value: undefined,
+                                },
+                            },
+                        },
+                    },
+                    meta
+                );
+            }
             return {
                 canExecute: false,
                 reason: `You must play ${currentCombinationType} as the combination`,
@@ -107,6 +184,25 @@ const playCardMove: MoveDefinition<
             currentCombination.cards
         );
         if (!isPlayedCombinationHigher && !isBombedOver) {
+            if (phoenixCard) {
+                ctx.dispatchAction<ChangeCardPayload>(
+                    actionTypes.CHANGE_CARD,
+                    {
+                        cardId: phoenixCard.id,
+                        zoneId: playersHandId,
+                        cardChanges: {
+                            templateFields: {
+                                ...phoenixCard.templateFields,
+                                custom: {
+                                    ...phoenixCard.templateFields.custom,
+                                    value: undefined,
+                                },
+                            },
+                        },
+                    },
+                    meta
+                );
+            }
             return {
                 canExecute: false,
                 reason: `You must play a higher valued ${currentCombinationType}.`,
@@ -141,27 +237,59 @@ const playCardMove: MoveDefinition<
                 },
                 meta
             );
+            ctx.dispatchAction<ResetNumberOfPassesPayload>(
+                tichuActions.RESET_NUMBER_OF_PASSES,
+                {},
+                meta
+            );
+
+            if (
+                !ctx.getState().customState.finishedPlayers.includes(playerId) &&
+                !isTurnEnd(state) &&
+                ctx.getState().coreState.phase === GAME_PHASES.PLAY_CARDS
+            ) {
+                ctx.dispatchAction<EndTurnPayload>(actionTypes.END_TURN, {}, meta);
+            }
         }
     },
     message: ({ cardIds }, ctx, meta) => {
         const playerNickname = meta.playerNickname!;
+        if (cardIds.some((id) => id.includes(SPECIAL_CARDS.DOG))) {
+            return `${playerNickname} played the dog.`;
+        }
+        const playerId = meta.playerId!;
         const state = ctx.getState();
-        const playedCombination = state.customState.playedCombination.type!;
+        const zones = state.coreState.zones;
+        const zonesArr = Object.values(zones);
+        const playersHandId = findPlayersHandId(zonesArr, playerId);
+        const playersHandCards = zones[playersHandId]!.cards;
+        const playedCards = playersHandCards.filter((card) => cardIds.includes(card.id));
+        const playedCombination =
+            state.customState.playedCombination.type ?? getCardCombination(playedCards);
         const playedCardsNamesSeparatedByComma = cardIds
             .map(
                 (id) =>
-                    state.coreState.zones[ZONES.PLAYED_CARDS]!.cards.find((card) => card.id === id)!
+                    state.coreState.zones[playersHandId]!.cards.find((card) => card.id === id)!
                         .templateFields.name
             )
             .join(', ');
         return `${playerNickname} played ${playedCombination} with cards: ${playedCardsNamesSeparatedByComma}.`;
     },
-    changeTurnAfter: true,
 };
 
 const passMove: MoveDefinition<any, TichuState, TichuGameSettings, any, TichuCard> = {
     name: MOVES.PASS,
     allowedPhases: [GAME_PHASES.PLAY_CARDS],
+    canExecute: (_, ctx) => {
+        const playedCards = ctx.getState().customState.playedCombination.cards;
+        if (playedCards.length === 0) {
+            return {
+                canExecute: false,
+                reason: "You can't pass if a card hasn't been played",
+            };
+        }
+        return { canExecute: true };
+    },
     execute: (_, ctx, meta) => {
         ctx.dispatchAction<AddNumberOfPassesPayload>(
             tichuActions.ADD_NUMBER_OF_PASSES,
@@ -170,12 +298,14 @@ const passMove: MoveDefinition<any, TichuState, TichuGameSettings, any, TichuCar
             },
             meta
         );
+        if (ctx.getState().coreState.phase !== GAME_PHASES.SEND_DECK) {
+            ctx.dispatchAction<EndTurnPayload>(actionTypes.END_TURN, {}, meta);
+        }
     },
     message: (_, __, meta) => {
         const playerNickname = meta.playerNickname!;
         return `${playerNickname} passed`;
     },
-    changeTurnAfter: true,
 };
 
 const sendDeckMove: MoveDefinition<SendDeckPayload, TichuState, TichuGameSettings, any, TichuCard> =
@@ -186,12 +316,12 @@ const sendDeckMove: MoveDefinition<SendDeckPayload, TichuState, TichuGameSetting
             const state = ctx.getState();
             const zones = state.coreState.zones;
             const zonesArr = Object.values(zones);
-            const recieverCollectedPileId = findPlayersCollectedPileId(zonesArr, playerId);
+            const receiverCollectedPileId = findPlayersCollectedPileId(zonesArr, playerId);
             ctx.dispatchAction<MoveCardsFromZonePayload>(
                 actionTypes.MOVE_CARDS_FROM_ZONE,
                 {
                     fromZoneId: ZONES.PLAYED_CARDS,
-                    toZoneId: recieverCollectedPileId,
+                    toZoneId: receiverCollectedPileId,
                 },
                 meta
             );
@@ -203,12 +333,12 @@ const sendDeckMove: MoveDefinition<SendDeckPayload, TichuState, TichuGameSetting
         },
         message: ({ playerId }, ctx, meta) => {
             const playerNickname = meta.playerNickname!;
-            const recieverNickname = ctx
+            const receiverNickname = ctx
                 .getState()
                 .networkState!.players.find(
                     (player) => player.playerId === playerId
                 )!.playerNickname;
-            return `${playerNickname} sent the deck with dragon to ${recieverNickname}.`;
+            return `${playerNickname} sent the deck with dragon to ${receiverNickname}.`;
         },
     };
 
@@ -243,12 +373,14 @@ const callTichuMove: MoveDefinition<
             meta
         );
     },
-    message: ({ calledTichu }, _, meta) => {
+    message: ({ calledTichu }, { getState }, meta) => {
         const playerNickname = meta.playerNickname!;
+        const currentPhase = getState().coreState.phase;
+        const tichuName = currentPhase === GAME_PHASES.BIG_TICHU ? 'Grand Tichu' : 'Tichu';
         if (calledTichu) {
-            return `${playerNickname} called ${calledTichu} tichu.`;
+            return `${playerNickname} called ${tichuName}.`;
         }
-        return `${playerNickname} did not call tichu.`;
+        return `${playerNickname} did not call ${tichuName}.`;
     },
 };
 
@@ -261,12 +393,13 @@ const sendCardsMove: MoveDefinition<
 > = {
     name: MOVES.SEND_CARDS,
     allowedPhases: [GAME_PHASES.SEND_CARDS],
-    canExecute: ({ sentCardIds }, ctx, _) => {
-        const cardsToSend = ctx
-            .getState()
-            .coreState.zones[ZONES.PLAYED_CARDS]!.cards.filter((card) =>
-                sentCardIds.includes(card.id)
-            );
+    canExecute: ({ sentCardIds }, ctx, meta) => {
+        const zones = ctx.getState().coreState.zones;
+        const zonesArr = Object.values(zones);
+        const playersHandId = findPlayersHandId(zonesArr, meta.playerId!);
+        const cardsToSend = zones[playersHandId]!.cards.filter((card) =>
+            sentCardIds.includes(card.id)
+        );
         if (cardsToSend.length !== 3) {
             return { canExecute: false, reason: 'You must send 3 cards' };
         }
@@ -274,16 +407,20 @@ const sendCardsMove: MoveDefinition<
     },
     execute: ({ sentCardIds }, ctx, meta) => {
         const playerId = meta.playerId!;
-        const cardsToSend = ctx
-            .getState()
-            .coreState.zones[ZONES.PLAYED_CARDS]!.cards.filter((card) =>
-                sentCardIds.includes(card.id)
-            );
+        const zones = ctx.getState().coreState.zones;
+        const zonesArr = Object.values(zones);
+        const playersHandId = findPlayersHandId(zonesArr, playerId);
+        const cardsToSend = zones[playersHandId]!.cards.filter((card) =>
+            sentCardIds.includes(card.id)
+        );
+        const sortedCardsToSend = cardsToSend.sort(
+            (a, b) => sentCardIds.indexOf(a.id) - sentCardIds.indexOf(b.id)
+        );
         ctx.dispatchAction<SetSentCardsForPlayerPayload>(
             tichuActions.SET_SENT_CARDS_FOR_PLAYER,
             {
                 playerId,
-                cards: cardsToSend,
+                cards: sortedCardsToSend,
             },
             meta
         );

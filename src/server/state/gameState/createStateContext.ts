@@ -38,6 +38,7 @@ export const getRandomize = (seed?: number | string) => {
 /**
  * Returns a function that, when called with a `relativePath`,
  * writes the `history` array as JSON to a file named by current timestamp.
+ * When fileName (without extension) is provided, it will be used as the filename.
  *
  * Usage:
  *   const exportFn = getExportHistory(history, filename);
@@ -52,21 +53,21 @@ const getExportHistory =
                 ...record.meta,
                 timestamp: record.meta.timestamp.toISOString(),
             },
-            payloadHistory: record.payloadHistory?.map((payloadRecord) => ({
-                ...payloadRecord,
-                payload: {
-                    ...payloadRecord.payload,
-                    timestamp: payloadRecord.payload.timestamp.toISOString(),
-                },
-            })),
         }));
-        const fileName = filename ?? `${new Date()}.json`;
-        const fullPath = path.join(relativePath, fileName);
+        const fileName = filename ?? `${new Date().getTime()}.json`;
+
+        // Ensure the directory exists
+        const fullDirPath = path.resolve(process.cwd(), relativePath);
+        if (!fs.existsSync(fullDirPath)) {
+            fs.mkdirSync(fullDirPath, { recursive: true });
+        }
+
+        const fullPath = path.join(fullDirPath, fileName + '.json');
         const jsonData = JSON.stringify(historyWithReadableDates, null, 2);
         try {
             fs.writeFileSync(fullPath, jsonData, 'utf8');
         } catch (err) {
-            console.error(err);
+            console.error('Error writing history file:', err);
         }
     };
 
@@ -278,7 +279,7 @@ export const createStateContext = <
 
         // Check game end conditions
         const endGameResult = loadedConfig.endGameCondition(context);
-        if (endGameResult) {
+        if (endGameResult && getState().coreState.gameInProgress) {
             finalState = endGameApply<CustomState, CustomGameOptions, CustomZone, CustomCard>(
                 endGameResult,
                 context,

@@ -1,13 +1,33 @@
-import { ReduxState, NetworkState } from '../types';
+import { createSelector } from '@reduxjs/toolkit';
+import { ReduxState } from '../types';
 
 /**
  * Selector to get the network info from the redux state.
  * @param state - The redux state
  * @returns The network info
  */
-export const getNetworkInfo = (state: ReduxState<any, any, any, any>): NetworkState => {
-    return state.game.networkState || {};
-};
+export const getNetworkInfo = (state: ReduxState<any, any, any, any>) =>
+    state.game.networkState || {};
+
+/**
+ * Selector to get the player ids from the redux state.
+ * @param state - The redux state
+ * @returns The player ids
+ */
+export const getPlayerIds = createSelector(
+    (state: ReduxState<any, any, any, any>) => state.game.networkState?.players,
+    (players) => players?.map((player) => player.playerId) || []
+);
+
+/**
+ * Selector to get the player nicknames from the redux state.
+ * @param state - The redux state
+ * @returns The player nicknames
+ */
+export const getPlayerNicknames = createSelector(
+    (state: ReduxState<any, any, any, any>) => state.game.networkState?.players,
+    (players) => players?.map((player) => player.playerNickname) || []
+);
 
 /**
  * Selector to get the number of players in the room from the redux state.
@@ -31,3 +51,11 @@ export const getRoomId = (state: ReduxState<any, any, any, any>) => state.game.n
  */
 export const isInLobby = (state: ReduxState<any, any, any, any>) =>
     !!state.game.networkState?.roomId;
+
+/**
+ * Selector to get the player id from the redux state.
+ * @param state - The redux state
+ * @returns The player id
+ */
+export const getYourPlayerId = (state: ReduxState<any, any, any, any>) =>
+    state.game.networkState?.playerId;

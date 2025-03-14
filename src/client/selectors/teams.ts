@@ -1,4 +1,5 @@
 import { ReduxState } from '../types';
+import { memoizeWithIdentity } from './utils';
 
 /**
  * Selector to get the teams from the redux state.
@@ -13,8 +14,10 @@ export const getTeams = (state: ReduxState<any, any, any, any>) => state.game.co
  * @param state - The redux state
  * @returns The team players
  */
-export const getTeamPlayersByTeamId = (teamId: string) => (state: ReduxState<any, any, any, any>) =>
-    state.game.coreState.teams?.[teamId];
+export const getTeamPlayersByTeamId = memoizeWithIdentity(
+    (teamId: string) => (state: ReduxState<any, any, any, any>) =>
+        state.game.coreState.teams?.[teamId]
+);
 
 /**
  * Selector to get the team players by player id from the redux state.
@@ -22,14 +25,15 @@ export const getTeamPlayersByTeamId = (teamId: string) => (state: ReduxState<any
  * @param state - The redux state
  * @returns The team players
  */
-export const getTeamPlayersByPlayerId =
+export const getTeamPlayersByPlayerId = memoizeWithIdentity(
     (playerId: string) => (state: ReduxState<any, any, any, any>) => {
         const teams = state.game.coreState.teams;
         if (!teams) {
             return [];
         }
         return Object.values(teams).find((players) => players.includes(playerId)) || [];
-    };
+    }
+);
 
 /**
  * Selector to check if two players are teammates.
@@ -38,7 +42,7 @@ export const getTeamPlayersByPlayerId =
  * @param state - The redux state
  * @returns True if the players are teammates, false otherwise
  */
-export const areTeammates =
+export const areTeammates = memoizeWithIdentity(
     (playerId1: string, playerId2: string) => (state: ReduxState<any, any, any, any>) => {
         const teams = state.game.coreState.teams;
         if (!teams) {
@@ -51,4 +55,5 @@ export const areTeammates =
             return false;
         }
         return teamOfFirstPlayer.includes(playerId2);
-    };
+    }
+);

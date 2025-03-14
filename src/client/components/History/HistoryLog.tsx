@@ -1,11 +1,19 @@
 import { getHistoryMessagesWithTimestamps } from '../../selectors';
 import { useSelector } from 'react-redux';
-import { Box, BoxProps, Stack, StackProps, Typography, TypographyProps } from '@mui/material';
-import React from 'react';
+import {
+    Box,
+    Stack,
+    StackProps,
+    Typography,
+    TypographyProps,
+    Paper,
+    PaperProps,
+} from '@mui/material';
+import React, { useEffect, useRef } from 'react';
 
 type HistoryLogProps = {
     containerProps?: StackProps;
-    recordProps?: BoxProps;
+    recordProps?: PaperProps;
     textProps?: TypographyProps;
 };
 
@@ -21,13 +29,82 @@ export const HistoryLog: React.FC<HistoryLogProps> = ({
     textProps = {},
 }) => {
     const historyRecords = useSelector(getHistoryMessagesWithTimestamps);
+    const stackRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (stackRef.current) {
+            stackRef.current.scrollTop = stackRef.current.scrollHeight;
+        }
+    }, [historyRecords]);
+
     return (
-        <Stack spacing={1} {...containerProps}>
-            {historyRecords.map((record, index) => (
-                <Box key={index} {...recordProps}>
-                    <Typography {...textProps}>{record}</Typography>
-                </Box>
-            ))}
+        <Stack
+            ref={stackRef}
+            spacing={1}
+            sx={{
+                p: 2,
+                height: '100%',
+                width: '100%',
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                '&::-webkit-scrollbar': {
+                    width: '8px',
+                },
+                '&::-webkit-scrollbar-track': {
+                    background: '#f1f1f1',
+                    borderRadius: '4px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                    background: '#888',
+                    borderRadius: '4px',
+                    '&:hover': {
+                        background: '#555',
+                    },
+                },
+                ...containerProps.sx,
+            }}
+            {...containerProps}
+        >
+            {historyRecords.map((record, index) => {
+                const [timestamp, message] = record.split(' - ');
+                return (
+                    <Paper
+                        key={index}
+                        elevation={0}
+                        sx={{
+                            p: 1,
+                            backgroundColor: 'rgba(0, 0, 0, 0.03)',
+                            borderRadius: 1,
+                            width: '100%',
+                            ...recordProps.sx,
+                        }}
+                        {...recordProps}
+                    >
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                            <Typography
+                                variant="caption"
+                                sx={{
+                                    color: 'text.primary',
+                                    ...textProps.sx,
+                                }}
+                                {...textProps}
+                            >
+                                {timestamp}
+                            </Typography>
+                            <Typography
+                                sx={{
+                                    flex: 1,
+                                    wordBreak: 'break-word',
+                                    ...textProps.sx,
+                                }}
+                                {...textProps}
+                            >
+                                {message}
+                            </Typography>
+                        </Box>
+                    </Paper>
+                );
+            })}
         </Stack>
     );
 };

@@ -2,34 +2,37 @@ export * from './components';
 export * from './context';
 export * from './hooks';
 export * from './selectors';
+export * from '../shared';
 
-import {
+import { useSelector, useDispatch } from 'react-redux';
+import { createSelector } from '@reduxjs/toolkit';
+export { useSelector, createSelector, useDispatch };
+
+import type {
     NetworkState,
     Selection,
     History,
     GameState,
     GameContextType,
     ReduxState,
-    Zone as ZoneType,
+    Zone,
     CardTemplate,
-    Card as CardType,
+    Card,
     SelectCardPayload,
     DisplayRegistry,
     GameContextProviderProps,
 } from './types';
 
-export * from '../shared';
-
-export {
+export type {
     NetworkState,
     Selection,
     History,
     GameState,
     GameContextType,
     ReduxState,
-    ZoneType,
+    Zone,
     CardTemplate,
-    CardType,
+    Card,
     SelectCardPayload,
     DisplayRegistry,
     GameContextProviderProps,
