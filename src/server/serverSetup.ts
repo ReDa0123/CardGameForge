@@ -6,7 +6,7 @@ import { events } from '../shared';
 import { setLoadedConfig } from './state';
 
 /**
- * The main function to setup and run the game server.
+ * The main function to set up and run the game server.
  * Configures vite proxy to allow cross-origin requests from the client by default.
  * @param port The port to run the server on
  * @param opts Options for the socket.io server
@@ -28,6 +28,7 @@ const setupAndRunServer = <
             origin: 'http://localhost:5173',
             methods: ['GET', 'POST'],
             credentials: true,
+            ...(opts.cors || {}),
         },
         ...opts,
     });

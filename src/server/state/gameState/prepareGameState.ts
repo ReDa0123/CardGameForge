@@ -141,13 +141,11 @@ export const prepareGameState = <
         };
     };
 
-    stateContext.dispatchAction<TurnOrder>(actionTypes.SET_TURN_ORDER, getDefaultTurnOrder(), {
-        roomId,
-        timestamp: new Date(),
-    });
+    const meta: Metadata = { roomId, timestamp: new Date() };
+
+    stateContext.dispatchAction<TurnOrder>(actionTypes.SET_TURN_ORDER, getDefaultTurnOrder(), meta);
 
     // Call gameSetup function
-    const meta: Metadata = { roomId, timestamp: new Date() };
     const finalInitialGameState = gameConfig.gameSetup(stateContext, meta);
 
     // Overwrite the state with the result of gameSetup
