@@ -264,7 +264,7 @@ Below are the types used in the game context.
     -   `getState: () => GameState<CustomState, CustomGameOptions, CustomZone, CustomCard>` - Function to get the current game state
     -   `dispatchAction: <ActionPayload>( actionName: string, payload: ActionPayload, meta: Metadata ) => GameState<CustomState, CustomGameOptions, CustomZone, CustomCard>` - Function to dispatch an action by action name to update the game state. Action hooks and card reactions are also triggered.
         At the end of the function execution end conditions are checked and the game state is updated.
-    -   `randomize: <T>(array: T[]) => T[]` - Function to randomize an array using the random seed of the game if it is set, otherwise using random seed
+    -   `randomize: <T>(array: T[]) => T[]` - Function to randomize an array using the random seed of the game if it is set, otherwise using random seed. Returns a new instance of the array.
     -   `getActionRegistry: () => ActionRegistry<CustomState, CustomGameOptions, CustomZone, CustomCard>` - Function to get the action registry that holds all the registered actions
     -   `getMovesRegistry: () => MovesRegistry<CustomState, CustomGameOptions, CustomZone, CustomCard>` - Function to get the moves registry that holds all the registered moves
     -   `addBeforeHook: AddHookFn<CustomState, CustomGameOptions, CustomZone, CustomCard>` - Function to add a before hook to an action
@@ -279,6 +279,55 @@ Below are the types used in the game context.
     -   `<ActionPayload>( actionName: string, hookId: string, hookApply: ( payload: ExtendedPayload<ActionPayload>, ctx: StateContext<CustomState, CustomGameOptions, CustomZone, CustomCard>, meta: Metadata ) => Partial<ExtendedPayload<ActionPayload>>, options?: { once?: boolean; removeCond?: ( payload: ExtendedPayload<Payload>, ctx: StateContext<CS, CGO, CZ, CC>, meta: Metadata ) => boolean; } ) => void` - Function to add a hook to an action. You can pass the hook ID, apply function that can change the payload and make side effects, and options that change the behavior of removal of the hook -
         once means that the hook will be removed after the first execution, removeCond is a function that determines if the hook should be removed
 
+**Example of adding a hook to an action:**
+
+```javascript
+ctx.addBeforeHook <
+    ChangeZonePayload >
+    ('CHANGE_ZONE',
+    'myHook',
+    (payload, ctx, meta) => {
+        return { ...payload, cardIds: 'card1' };
+    },
+    { once: true });
+```
+
+**Example of removing a hook from an action:**
+
+```javascript
+ctx.removeBeforeHook('myHook', 'CHANGE_ZONE');
+```
+
+**Example of dispatching an action:**
+
+```javascript
+ctx.dispatchAction <
+    ChangeZonePayload >
+    ('CHANGE_ZONE', { cardIds: 'card1', fromZoneId: 'hand', toZoneId: 'discard' }, meta);
+```
+
+**Example of randomizing an array:**
+
+```javascript
+const randomizedArray = ctx.randomize([1, 2, 3, 4, 5]);
+```
+
+**Example of exporting history:**
+
+```javascript
+ctx.exportHistory('./exports', `PrototypeHistory - ${new Date().toISOString()}.json`);
+```
+
+**Example of creating a card from a template:**
+
+```javascript
+const card = ctx.createCardFromTemplate(
+    cardTemplate,
+    { displayType: 'default' },
+    { state: 'default' }
+);
+```
+
 #### Functions
 
 The main function for creating and running the game server is `setupAndRunServer`. It initializes the game server and runs it on the specified port.
@@ -289,13 +338,26 @@ The main function for creating and running the game server is `setupAndRunServer
         -   `port?: number` - Port number to run the server on
         -   `opts?: Partial<ServerOptions>` - Socket.IO server configuration options
         -   `gameConfig: GameConfig<CustomState, CustomGameOptions, CustomZone, CustomCard>` - Game configuration
+    -   **Example**:
+        ```javascript
+        import { setupAndRunServer } from 'cardgameforge/server';
+        setupAndRunServer < TichuState,
+            TichuGameSettings,
+            any,
+            TichuCard > (3000, {}, tichuGameConfig);
+        ```
 -   `assocByDotPath<T>(obj: T, path: string, value: unknown): T`
-    -   **Description**: Utility function you can use to update nested objects in the game state in action appliers.
+    -   **Description**: Utility function you can use to update nested objects in the game state in action appliers. Returns a new instance of the object with the updated value.
     -   **Parameters**:
         -   `obj: T` - Object to update
         -   `path: string` - Dot path to the nested object (for example 'coreState.turnOrder.activePlayer')
         -   `value: unknown` - Value to set
--   **Returns**: Updated object
+    -   **Returns**: Updated object - copy of the original object with the updated value
+    -   **Example**:
+        ```javascript
+        import { assocByDotPath } from 'cardgameforge/server';
+        const updatedState = assocByDotPath(state, 'coreState.turnOrder.activePlayer', 'player2');
+        ```
 
 #### Constants
 
@@ -357,6 +419,31 @@ Bellow are the available actions with a description of what the apply function d
         If `numberOfCards` is provided, move the specified number of first cards from the source zone to the destination zone.
     -   **Payload**: `MoveCardsFromZonePayload` - `{ fromZoneId: string; toZoneId: string; numberOfCards?: number; }` - Source zone ID, destination zone ID, and optional number of cards to move
 
+**Example of creating own action:**
+
+```javascript
+import { ActionTemplate } from 'cardgameforge/server';
+export const setScore: ActionTemplate<
+    { score: number },
+    CustomState,
+    CustomGameOptions,
+    CustomZone,
+    CustomCard
+> = {
+    name: tichuActions.SET_ORIGINAL_PLAY_ORDER,
+    apply: (payload, ctx) => {
+        const score = payload.score;
+        return {
+            ...state,
+            customState: {
+                ...state.customState,
+                score,
+            },
+        };
+    },
+};
+```
+
 ### Client
 
 In addition to the exported features listed below, `useSelector, useDispatch and createSelector` are exported so that you don't need to install `react-redux` separately.
@@ -408,6 +495,17 @@ Below are the actions that can be dispatched using `useDispatch` function on the
     -   **Description**: Unselects all cards in all zones
     -   **Payload**: `void` - No payload
 
+**Example of dispatching an action on the client:**
+
+```javascript
+import { useDispatch, selectCard } from 'cardgameforge/client';
+//...
+const dispatch = useDispatch();
+//...
+dispatch(selectCard({ zoneId: 'hand', cardId: 'card1' }));
+//...
+```
+
 #### Game Context
 
 Exports game context functionality for managing game state and network communication - it hooks the events from the server and updates the game state on the client side.
@@ -421,6 +519,29 @@ Use the `GameContextProvider` component to wrap your game with the game context.
         -   `materialTheme?: Theme` - The material theme
         -   `children: React.ReactNode` - The game components
 
+**Example of using the GameContextProvider:**
+
+```javascript
+import { GameContextProvider } from 'cardgameforge/client';
+const displayRegistry = {
+    default: DefaultCard,
+    displayTypes: {
+        card: {
+            default: DefaultCard,
+            zones: {
+                hand: HandCard,
+                deck: DeckCard,
+                discard: DiscardCard,
+            },
+        },
+    },
+};
+//...
+<GameContextProvider displayRegistry={displayRegistry} serverAddress="http://localhost:3000">
+    <Game />
+</GameContextProvider>;
+```
+
 #### React hooks
 
 CardGameForge provides hooks to access the game context and the socket instance, display registry, and to send moves to the server.
@@ -433,17 +554,35 @@ CardGameForge provides hooks to access the game context and the socket instance,
         -   `zoneId: string` - Zone ID of the card
     -   **Returns**: Display component for the card
         type AllowedVariant = 'default' | 'error' | 'success' | 'warning' | 'info';
+    -   **Example**:
+        ```javascript
+        import { useDisplayRegistry } from 'cardgameforge/client';
+        const DisplayComponent = useDisplayRegistry('card1', 'hand_player1');
+        return <DisplayComponent />;
+        ```
 -   `useNotification` - Hook to display a notification
     -   **Returns**: Function to display a notification
         -   **Parameters** (of the returned function):
             -   `message: string` - The message to display
             -   `variant: 'default' | 'error' | 'success' | 'warning' | 'info'` - The variant of the notification
+        -   **Example**:
+            ```javascript
+            import { useNotification } from 'cardgameforge/client';
+            const notify = useNotification();
+            return <Box onClick={() => notify('Hello world!', 'info')}>Click me</Box>;
+            ```
 -   `useSendMove` - Hook to send a move to the server. You can pass the type of the payload of the move for type safety.
     -   **Parameters**:
         -   `moveId: string` - The id of the move
     -   **Returns**: Function to send a move to the server
         -   **Parameters** (of the returned function):
             -   `payload: Payload` - The payload of the move
+        -   **Example**:
+            ```javascript
+            import { useSendMove } from 'cardgameforge/client';
+            const sendMove = useSendMove < PlayCardPayload > 'PLAY_CARD';
+            return <Box onClick={() => sendMove({ cardId: 'card1' })}>Click me</Box>;
+            ```
 
 #### Selectors
 
@@ -498,6 +637,14 @@ When creating your selectors you can use the `createSelector` function from the 
 -   `isPerPlayerZone` - Selector to check if a zone is per player
     -   `zoneId: string` - The id of the zone
 
+**Example of using a selector:**
+
+```javascript
+import { useSelector, getEndGameResult } from 'cardgameforge/client';
+//...
+const endGameResult = useSelector(getEndGameResult); // Gets the end game result from the redux state
+```
+
 #### UI Components
 
 CardGameForge provides pre-made UI components that you can use to build your game UI. Below are the available components.
@@ -513,6 +660,21 @@ CardGameForge provides pre-made UI components that you can use to build your gam
         -   `gameOptions?: Record<string, any>` - The game options that will be passed to the server when the game is started
         -   `setGameOptions?: React.Dispatch<React.SetStateAction<any>>` - The function to set the game options
         -   `title?: string` - The title of the game
+    -   **Example**:
+        ```javascript
+        import { GameContainer } from 'cardgameforge/client';
+        //...
+        const [gameOptions, setGameOptions] = useState({ option1: 'value1' });
+        <GameContainer
+            GameComponent={Game}
+            minNumberOfPlayers={2}
+            maxNumberOfPlayers={4}
+            title="My Game"
+            GameOptionsFormComponent={GameOptionsForm}
+            gameOptions={gameOptions}
+            setGameOptions={setGameOptions}
+        />;
+        ```
 
 -   `GameConnect` - Component to render game finder or game lobby if the player is not in a game. You won't probably use this component as it is rendered in the `GameContainer` when the game is not active.
 
@@ -545,10 +707,22 @@ CardGameForge provides pre-made UI components that you can use to build your gam
         -   `containerProps?: StackProps` - The props for the container stack that holds the history records
         -   `recordProps?: PaperProps` - The props for the record row
         -   `textProps?: TypographyProps` - The props for the text in the record
+    -   **Example**:
+        ```javascript
+        import { HistoryLog } from 'cardgameforge/client';
+        //...
+        <HistoryLog />;
+        ```
 
 -   `HistoryPopup` - Component that displays the last message from the history. It uses the `useNotification` hook to display the message.
 
     -   **Props**: None
+    -   **Example**:
+        ```javascript
+        import { HistoryPopup } from 'cardgameforge/client';
+        //...
+        <HistoryPopup />;
+        ```
 
 -   `Zone` - displays zone cards based on the zone id and style type. It uses the display registry to get the card display component. Per player zones are display face down card backs for other players by default.
 
@@ -571,6 +745,12 @@ CardGameForge provides pre-made UI components that you can use to build your gam
         -   `showFirstCard?: boolean` - Whether to show the first card - only used if styleType is 'deck'
         -   `sortFn?: (cards: Card<any>[]) => Card<any>[]` - The function to call to sort the cards - only used if styleType is 'hand'
         -   `allFaceDown?: boolean` - Whether to show all cards face down - only used if styleType is 'pile'
+    -   **Example**:
+        ```javascript
+        import { Zone } from 'cardgameforge/client';
+        //...
+        <Zone zoneId="deck" styleType="deck" topCardsCount={5} />;
+        ```
 
 -   `Card` - Component that displays a card in a zone based on the card id and zone id. It uses the display registry to get the card display component. It also handles the face down state of the card based on the zone owner and the current player.
     You probably won't use this component directly as it is used by the `Zone` component.
@@ -587,18 +767,33 @@ CardGameForge provides pre-made UI components that you can use to build your gam
 
     -   **Props**:
         -   `zoneId: string` - The id of the zone
-        -   `title?: string` - The title of the selected cards
+        -   `title?: string` - The title above the selected cards
         -   `onCardClick?: (cardId: string, zoneId: string) => void` - The function to call when a card is clicked
         -   `containerProps?: BoxProps` - The props for the container for all cards
         -   `cardContainerProps?: BoxProps` - The props for the card container
         -   `paperProps?: PaperProps` - The props for the paper
         -   `titleProps?: TypographyProps` - The props for the title
+    -   **Example**:
+        ```javascript
+        import { SelectedCards } from 'cardgameforge/client';
+        //...
+        <SelectedCards zoneId="hand_player1" title="Selected cards" />;
+        ```
 
 -   `SelectedCardsMultiZone` - Component that displays the selected cards in multiple zones. If zoneIds are provided, it will only display the selected cards in those zones. Otherwise, it will display all zones that have selected cards.
     -   **Props**:
         -   `zoneIds?: string[]` - The ids of the zones
         -   `title?: string` - The title of the selected cards
         -   `onCardClick?: (cardId: string, zoneId: string) => void` - The function to call when a card is clicked
-        -   `containerProps?: Omit<BoxProps, 'sx'> & { sx?: BoxProps['sx'] }` - The props for the container
-        -   `titleProps?: Omit<TypographyProps, 'sx'> & { sx?: TypographyProps['sx'] }` - The props for the title
+        -   `containerProps?: BoxProps` - The props for the container
+        -   `titleProps?: TypographyProps` - The props for the title
         -   `selectedCardsProps?: Omit<React.ComponentProps<typeof SelectedCards>, 'zoneId' | 'title' | 'onCardClick'>` - The props for the selected cards
+    -   **Example**:
+        ```javascript
+        import { SelectedCardsMultiZone } from 'cardgameforge/client';
+        //...
+        <SelectedCardsMultiZone
+            zoneIds={['hand_player1', 'hand_player2']}
+            title="Selected cards"
+        />;
+        ```
