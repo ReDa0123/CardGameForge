@@ -57,7 +57,7 @@ const GameContextInner: React.FC<Omit<GameContextProviderProps, 'materialTheme'>
 
     useEffect(() => {
         if (socket) {
-            // Listen fir join room errors
+            // Listen for join room errors
             socket.on(events.rooms.INVALID_ROOM_INPUT, () => {
                 notify('Select a room to join and provide a nickname', 'error');
             });

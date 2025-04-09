@@ -3,6 +3,7 @@ import {
     getNetworkInfo,
     getPhase,
     getYourPlayerId,
+    NetworkState,
     ReduxState,
 } from 'cardgameforge/client';
 import { TichuState } from 'src/server/types';
@@ -102,11 +103,14 @@ export const getTichuType = createSelector(getPhase, (phase) => {
 });
 
 export const getPlayedCombinationInfo = createSelector(
-    getPlayedCombination,
-    (playedCombination) => {
+    [getPlayedCombination, getNetworkInfo],
+    (playedCombination, networkInfo: NetworkState) => {
         return {
             currentCombination: playedCombination.type,
             cardsInCombination: playedCombination.cards.map((card) => card.templateFields.name),
+            playedBy: networkInfo.players?.find(
+                ({ playerId }) => playedCombination.playedBy === playerId
+            )?.playerNickname,
         };
     }
 );

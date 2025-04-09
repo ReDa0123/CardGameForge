@@ -1,6 +1,6 @@
 import { useGameContext } from '../context';
 import { useSelector } from 'react-redux';
-import { findCardInZone } from '../selectors';
+import { findCardInZone, getZoneById } from '../selectors';
 import React, { useMemo } from 'react';
 import { CardComponent } from '../types';
 
@@ -11,7 +11,9 @@ import { CardComponent } from '../types';
  */
 export const useDisplayRegistry = (cardId: string, zoneId: string): CardComponent => {
     const card = useSelector(findCardInZone(cardId, zoneId));
+    const zone = useSelector(getZoneById(zoneId));
     const gameContext = useGameContext();
+    const zoneType = zone?.type ?? zoneId;
     const displayRegistry = useMemo(() => gameContext.displayRegistry, [gameContext]);
 
     return useMemo<React.ComponentType<any>>(() => {
@@ -23,6 +25,6 @@ export const useDisplayRegistry = (cardId: string, zoneId: string): CardComponen
         if (!typeInRegistry) {
             return displayRegistry.default;
         }
-        return typeInRegistry.zones?.[zoneId] ?? typeInRegistry.default;
-    }, [card, displayRegistry.default, displayRegistry.displayTypes, zoneId]);
+        return typeInRegistry.zones?.[zoneType] ?? typeInRegistry.default;
+    }, [card, displayRegistry.default, displayRegistry.displayTypes, zoneType]);
 };

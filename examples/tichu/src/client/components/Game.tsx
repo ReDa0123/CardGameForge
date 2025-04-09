@@ -11,7 +11,6 @@ import {
     getPhase,
     useNotification,
     Card,
-    getYourPlayerId,
     getEndGameResult,
 } from 'cardgameforge/client';
 import {
@@ -123,15 +122,8 @@ export const Game: React.FC = () => {
         teammateCollectedPileId,
         rightPlayerCollectedPileId,
     } = useSelector(getCollectedPileIds);
-    const {
-        leftPlayerId,
-        rightPlayerId,
-        teammateId,
-        leftPlayerNickname,
-        rightPlayerNickname,
-        teammateNickname,
-    } = useSelector(getOtherPlayersInfo);
-    const yourPlayerId = useSelector(getYourPlayerId);
+    const { leftPlayerNickname, rightPlayerNickname, teammateNickname } =
+        useSelector(getOtherPlayersInfo);
     const currentPhase = useSelector(getPhase);
     const endGameResult = useSelector(getEndGameResult);
     const teamScores = useSelector(getTeamScoresWithTeamNames);
@@ -218,8 +210,14 @@ export const Game: React.FC = () => {
                     transform: 'translateX(-50%)',
                 }}
             >
-                <Typography variant="h6">Your hand</Typography>
-                <Typography variant="h6">{yourPlayerId}</Typography>
+                <Typography
+                    variant="h6"
+                    sx={{
+                        textAlign: 'center',
+                    }}
+                >
+                    Your hand
+                </Typography>
                 <Zone
                     zoneId={yourHandId}
                     styleType="hand"
@@ -228,6 +226,7 @@ export const Game: React.FC = () => {
                     sortFn={sortFn}
                 />
             </Box>
+
             {/* Your collected pile */}
             <Box
                 sx={{
@@ -250,7 +249,6 @@ export const Game: React.FC = () => {
                 }}
             >
                 <Typography variant="h6">{leftPlayerNickname}</Typography>
-                <Typography variant="h6">{leftPlayerId}</Typography>
                 <Zone
                     zoneId={leftPlayerHandId}
                     styleType="hand"
@@ -280,7 +278,6 @@ export const Game: React.FC = () => {
                 }}
             >
                 <Typography variant="h6">{rightPlayerNickname}</Typography>
-                <Typography variant="h6">{rightPlayerId}</Typography>
                 <Zone
                     zoneId={rightPlayerHandId}
                     styleType="hand"
@@ -309,8 +306,24 @@ export const Game: React.FC = () => {
                     transform: 'translateX(-50%) rotate(180deg)',
                 }}
             >
-                <Typography variant="h6">{teammateNickname}</Typography>
-                <Typography variant="h6">{teammateId}</Typography>
+                <Typography
+                    variant="h6"
+                    sx={{
+                        textAlign: 'center',
+                        transform: 'rotate(180deg)',
+                    }}
+                >
+                    Teammate's hand
+                </Typography>
+                <Typography
+                    variant="h6"
+                    sx={{
+                        transform: 'rotate(180deg)',
+                        textAlign: 'center',
+                    }}
+                >
+                    {teammateNickname}
+                </Typography>
                 <Zone
                     zoneId={teammateHandId}
                     styleType="hand"

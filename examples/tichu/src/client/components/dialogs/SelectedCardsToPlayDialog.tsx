@@ -28,6 +28,25 @@ type PlayCardsPayload = {
 
 type PassPayload = {};
 
+const CurrentCombination = ({ currentCombination, cardsInCombination, playedBy }: any) => {
+    if (!currentCombination) {
+        return null;
+    }
+    return (
+        <>
+            <Typography variant="h6" mt="4px !important">
+                Current combination: {currentCombination}
+            </Typography>
+            <Typography variant="h6" mt="4px !important">
+                Last played cards in that combination: {cardsInCombination.join(', ')}
+            </Typography>
+            <Typography variant="h6" mt="4px !important">
+                Played by: {playedBy}
+            </Typography>
+        </>
+    );
+};
+
 export const SelectedCardsToPlayDialog: React.FC<SelectedCardsToPlayDialogProps> = ({
     open,
     yourHandId,
@@ -38,7 +57,8 @@ export const SelectedCardsToPlayDialog: React.FC<SelectedCardsToPlayDialogProps>
     const executePlayCardsMove = useSendMove<PlayCardsPayload>('PLAY_CARDS');
     const executePassMove = useSendMove<PassPayload>('PASS');
     const isOnPlay = useSelector(areYouActivePlayer);
-    const { currentCombination, cardsInCombination } = useSelector(getPlayedCombinationInfo);
+    const { currentCombination, cardsInCombination, playedBy } =
+        useSelector(getPlayedCombinationInfo);
     const notify = useNotification();
     const selectedCards = useSelector(getSelectedCardsInZone(yourHandId));
     const onSendClick = useCallback(() => {
@@ -71,26 +91,27 @@ export const SelectedCardsToPlayDialog: React.FC<SelectedCardsToPlayDialogProps>
         <BaseDialog open={open}>
             <Stack spacing={3} alignItems="center">
                 {!isOnPlay ? (
-                    <Typography variant="h5" component="h2" textAlign="center">
-                        Wait for your turn
-                    </Typography>
+                    <>
+                        <Typography variant="h5" component="h2" textAlign="center">
+                            Wait for your turn
+                        </Typography>
+                        <CurrentCombination
+                            currentCombination={currentCombination}
+                            cardsInCombination={cardsInCombination}
+                            playedBy={playedBy}
+                        />
+                    </>
                 ) : (
                     <>
                         <Typography variant="h5" component="h2" textAlign="center">
                             Play your cards
                         </Typography>
                         <SelectedCards zoneId={yourHandId} onCardClick={handleCardClick} />
-                        {currentCombination && (
-                            <>
-                                <Typography variant="h6">
-                                    Current combination: {currentCombination}
-                                </Typography>
-                                <Typography variant="h6">
-                                    Last played cards in that combination:{' '}
-                                    {cardsInCombination.join(', ')}
-                                </Typography>
-                            </>
-                        )}
+                        <CurrentCombination
+                            currentCombination={currentCombination}
+                            cardsInCombination={cardsInCombination}
+                            playedBy={playedBy}
+                        />
                         <Stack direction="row" spacing={2} justifyContent="center">
                             <Button
                                 variant="contained"
