@@ -1,6 +1,6 @@
 {
     "name": "cardgameforge",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "types": "./dist/types/index.d.ts",
     "scripts": {
         "build:server": "tsc -p tsconfig.server.json",

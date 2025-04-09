@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Zone as ZoneType } from '../../types';
 import { Card } from '../Card';
 import { Box, Paper, Typography, BoxProps } from '@mui/material';
-import { Card as CardType } from '../..';
+import { CardType } from '../..';
 
 type ZoneHandProps = {
     zone: ZoneType<any, any>;

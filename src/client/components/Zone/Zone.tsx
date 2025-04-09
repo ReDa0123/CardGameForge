@@ -5,7 +5,7 @@ import { ZoneHand } from './ZoneHand';
 import { ZoneDeck } from './ZoneDeck';
 import { ZonePile } from './ZonePile';
 import { BoxProps, BadgeProps } from '@mui/material';
-import { Card } from '../..';
+import { CardType } from '../..';
 
 // Base props for all zone types
 type ZoneBaseProps = {
@@ -21,7 +21,7 @@ type ZoneHandProps = ZoneBaseProps & {
     handStyle?: 'line' | 'fan';
     zoneHandContainerProps?: BoxProps;
     zoneHandCardContainerProps?: BoxProps;
-    sortFn?: (cards: Card<any>[]) => Card<any>[];
+    sortFn?: (cards: CardType<any>[]) => CardType<any>[];
 };
 
 // Props specific to deck style
