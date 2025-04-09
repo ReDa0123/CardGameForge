@@ -1,9 +1,12 @@
 {
     "name": "cardgameforge",
-    "version": "0.1.0",
+    "version": "0.1.4",
+    "types": "./dist/types/index.d.ts",
     "scripts": {
         "build:server": "tsc -p tsconfig.server.json",
         "build:client": "tsc -p tsconfig.client.json",
+        "build:root": "tsc -p tsconfig.root.json",
+        "build": "npm run build:server && npm run build:client && npm run build:root",
         "dev:server": "tsc --watch -p tsconfig.server.json & nodemon dist/server/server/index.js",
         "dev:client": "tsc --watch -p tsconfig.client.json",
         "start:server": "node dist/server/server/index.js",
@@ -49,10 +52,22 @@
     },
     "files": [
         "dist",
+        "!dist/**/*.test.*",
+        "!dist/**/__tests__/**",
         "README.md"
     ],
     "exports": {
-        "./server": "./dist/server/server/index.js",
-        "./client": "./dist/client/client/index.js"
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "default": "./dist/client/client/index.js"
+        },
+        "./client": {
+            "types": "./dist/types/client/index.d.ts",
+            "default": "./dist/client/client/index.js"
+        },
+        "./server": {
+            "types": "./dist/types/server/index.d.ts",
+            "default": "./dist/server/server/index.js"
+        }
     }
 }

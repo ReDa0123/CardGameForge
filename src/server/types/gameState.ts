@@ -1,7 +1,6 @@
 import { Card, CardTemplate, Zone } from './gameObjects';
 import { ActionRegistry, MovesRegistry } from './registries';
 import { GameConfig } from './gameConfig';
-import { historyRecordsTypes } from '../constants';
 import { EndGameResult, Teams, TurnOrder } from '../../shared';
 
 export type NetworkState = {
@@ -47,7 +46,7 @@ export type Metadata = {
     hookId?: string;
 };
 
-export type RecordType = typeof historyRecordsTypes[keyof typeof historyRecordsTypes];
+export type RecordType = 'MOVE' | 'ACTION' | 'SYSTEM';
 
 export type PayloadHistoryRecord<Payload> = {
     payload: Payload;

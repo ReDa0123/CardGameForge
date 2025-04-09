@@ -15,12 +15,13 @@ import type {
     GameState,
     GameContextType,
     ReduxState,
-    Zone,
+    Zone as ZoneType,
     CardTemplate,
-    Card,
+    Card as CardType,
     SelectCardPayload,
     DisplayRegistry,
     GameContextProviderProps,
+    CardComponent,
 } from './types';
 
 export type {
@@ -30,10 +31,11 @@ export type {
     GameState,
     GameContextType,
     ReduxState,
-    Zone,
+    ZoneType,
     CardTemplate,
-    Card,
+    CardType,
     SelectCardPayload,
     DisplayRegistry,
     GameContextProviderProps,
+    CardComponent,
 };

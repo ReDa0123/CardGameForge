@@ -19,6 +19,8 @@ serverSetup(args);
 ```
 
 To create a game client, include the `GameContextProvider` from `cardgameforde/client`
-at the root of your React app.\
-\
-For further usage check the [docs](docs.md) markdown.
+at the root of your React app.
+
+When using TS, you must use `modeuleResolution` of `node16` or `nodenext` in your tsconfig.json file.
+
+For further usage check the [docs](https://github.com/ReDa0123/CardGameForge/blob/master/docs.md) markdown.

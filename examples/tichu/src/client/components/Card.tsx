@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography, Box } from '@mui/material';
-import { CardComponent } from 'cardgameforge/client/types';
+import { CardComponent } from 'cardgameforge/client';
 import { useSelector, isSelected } from 'cardgameforge/client';
 import { CardSuit, TichuCard } from 'src/server/types';
 

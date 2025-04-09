@@ -1,8 +1,14 @@
 import { CardSuit, TichuCard, TichuGameSettings, TichuState } from '../types';
-import { CardTemplate, Metadata, StateContext } from 'cardgameforge/server/types';
 import { COMBINATIONS, MOVES, SPECIAL_CARDS, ZONES } from '../constants';
 import { findPlayersHandId, getNextPlayerNotFinished, getTeammateIdFromTeam } from './utils';
-import { actionTypes, SetActivePlayerPayload, ChangeZonePayload } from 'cardgameforge/server';
+import {
+    actionTypes,
+    SetActivePlayerPayload,
+    ChangeZonePayload,
+    CardTemplate,
+    Metadata,
+    StateContext,
+} from 'cardgameforge/server';
 import { PlayCardsPayload } from './moves';
 
 const NUMBERS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
