@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { getHistoryMessages } from '../../selectors';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNotification } from '../../hooks';
 
 /**
@@ -8,11 +8,18 @@ import { useNotification } from '../../hooks';
  * It uses the useNotification hook to display the message.
  */
 export const HistoryPopup = () => {
+    const lastHistoryArr = useRef<string[]>([]);
     const history = useSelector(getHistoryMessages);
     const notify = useNotification();
     useEffect(() => {
-        if (history.length > 0) {
-            notify(history[history.length - 1]);
+        const newHistoryLength = history.length;
+        const oldHistoryLength = lastHistoryArr.current.length;
+        if (newHistoryLength > oldHistoryLength) {
+            const messagesToDisplay = history.slice(oldHistoryLength, newHistoryLength).reverse();
+            messagesToDisplay.forEach((message) => {
+                notify(message);
+            });
+            lastHistoryArr.current = history;
         }
     }, [history, notify]);
 };

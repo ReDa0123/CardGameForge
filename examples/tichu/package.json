@@ -6,7 +6,7 @@
         "build:server": "tsc -p tsconfig.server.json",
         "build:client": "vite build",
         "dev:server": "tsc --watch -p tsconfig.server.json",
-        "dev:client": "vite",
+        "dev:client": "vite --host",
         "start:server": "node dist/server/src/server/server.js",
         "start:client": "vite preview",
         "test": "jest --config jest.config.ts"

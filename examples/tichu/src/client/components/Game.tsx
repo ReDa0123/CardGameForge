@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { Zone } from 'cardgameforge/client/components';
 import {
     selectCard,
@@ -12,6 +12,7 @@ import {
     useNotification,
     Card,
     getEndGameResult,
+    HistoryPopup,
 } from 'cardgameforge/client';
 import {
     getCollectedPileIds,
@@ -109,10 +110,12 @@ const useOnCardClick = (
     }
     return undefined;
 };
+
 export const Game: React.FC = () => {
     const [phoenixValue, setPhoenixValue] = useState<number | undefined>(undefined);
     const [choosePhoenixValueDialogOpen, setChoosePhoenixValueDialogOpen] =
         useState<boolean>(false);
+    const [sortType, setSortType] = useState<'value' | 'suit'>('value');
 
     const { yourHandId, leftPlayerHandId, teammateHandId, rightPlayerHandId } =
         useSelector(getHandIds);
@@ -136,13 +139,31 @@ export const Game: React.FC = () => {
         setChoosePhoenixValueDialogOpen,
         phoenixValue
     );
-    const sortFn = useCallback((cards: Card<TichuCard>[]) => {
-        return [...cards].sort((a, b) => {
-            const valueA = a.templateFields.custom!.value ?? 0;
-            const valueB = b.templateFields.custom!.value ?? 0;
-            return valueA - valueB;
-        });
-    }, []);
+    const sortFn = useCallback(
+        (cards: Card<TichuCard>[]) => {
+            if (sortType === 'suit') {
+                return [...cards].sort((a, b) => {
+                    const suitA: string = a.templateFields.custom!.suit ?? 'AAAA';
+                    const suitB: string = b.templateFields.custom!.suit ?? 'AAAA';
+                    if (suitA > suitB) {
+                        return 1;
+                    }
+                    if (suitA < suitB) {
+                        return -1;
+                    }
+                    const valueA = a.templateFields.custom!.value ?? 0;
+                    const valueB = b.templateFields.custom!.value ?? 0;
+                    return valueA - valueB;
+                });
+            }
+            return [...cards].sort((a, b) => {
+                const valueA = a.templateFields.custom!.value ?? 0;
+                const valueB = b.templateFields.custom!.value ?? 0;
+                return valueA - valueB;
+            });
+        },
+        [sortType]
+    );
 
     if (endGameResult) {
         return (
@@ -205,9 +226,11 @@ export const Game: React.FC = () => {
             <Box
                 sx={{
                     position: 'absolute',
-                    bottom: 0,
+                    bottom: 20,
                     left: '50%',
                     transform: 'translateX(-50%)',
+                    display: 'flex',
+                    flexDirection: 'column',
                 }}
             >
                 <Typography
@@ -218,12 +241,19 @@ export const Game: React.FC = () => {
                 >
                     Your hand
                 </Typography>
+                <Button
+                    variant="contained"
+                    onClick={() => setSortType((type) => (type === 'suit' ? 'value' : 'suit'))}
+                >
+                    Sort by {sortType === 'suit' ? 'value' : 'suit'}
+                </Button>
                 <Zone
                     zoneId={yourHandId}
                     styleType="hand"
                     handStyle="fan"
                     onCardClick={onCardClick}
                     sortFn={sortFn}
+                    hoverStyle="overDelay"
                 />
             </Box>
 
@@ -375,6 +405,9 @@ export const Game: React.FC = () => {
 
             {/* Game overview */}
             <GameOverview />
+
+            {/* History popups */}
+            <HistoryPopup />
         </Box>
     );
 };

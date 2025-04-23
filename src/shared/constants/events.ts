@@ -9,6 +9,7 @@ export const events = {
         GAME_START: 'gameStart',
         INVALID_NUMBER_OF_PLAYERS: 'invalidNumberOfPlayers',
         RESET_NETWORK_STATE: 'resetNetworkState',
+        OPTIONS_CHANGED: 'optionsChanged',
     },
     PLAY_MOVE: 'playMove',
     MOVE_FAILED: 'moveFailed',

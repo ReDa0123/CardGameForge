@@ -22,6 +22,8 @@ type ZoneHandProps = ZoneBaseProps & {
     zoneHandContainerProps?: BoxProps;
     zoneHandCardContainerProps?: BoxProps;
     sortFn?: (cards: CardType<any>[]) => CardType<any>[];
+    hoverStyle?: 'over' | 'overDelay' | 'none';
+    disableHoverAnimation?: boolean;
 };
 
 // Props specific to deck style
@@ -67,6 +69,9 @@ export type ZoneProps = ZoneHandProps | ZoneDeckProps | ZonePileProps;
  * @param showFirstCard - Whether to show the first card - only used if styleType is 'deck'
  * @param sortFn - The function to call to sort the cards - only used if styleType is 'hand'
  * @param allFaceDown - Whether to show all cards face down - only used if styleType is 'pile'
+ * @param hoverStyle - The style to apply when the card is hovered. Over increases the z index over the other cards in hand.
+ * overDelay does the same after two-second delay. None does not increase the z index. Only when styleType is 'hand'.
+ * @param disableHoverAnimation - Whether to disable the hover animation. Only when styleType is 'hand'.
  */
 export const Zone: React.FC<ZoneProps> = (props) => {
     const { zoneId, styleType } = props;
@@ -86,6 +91,8 @@ export const Zone: React.FC<ZoneProps> = (props) => {
                 CardBackProps,
                 onCardClick,
                 sortFn,
+                hoverStyle,
+                disableHoverAnimation,
             } = props;
             return (
                 <ZoneHand
@@ -97,6 +104,8 @@ export const Zone: React.FC<ZoneProps> = (props) => {
                     CardBackProps={CardBackProps}
                     onCardClick={onCardClick}
                     sortFn={sortFn}
+                    hoverStyle={hoverStyle}
+                    disableHoverAnimation={disableHoverAnimation}
                 />
             );
         }

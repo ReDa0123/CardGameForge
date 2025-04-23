@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import { getRoomPlayersCount, getRoomId, getPlayerNicknames, getPlayerIds } from '../../selectors';
 import { useSocket } from '../../context';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { events } from '../../../shared';
 import {
     Button,
@@ -54,6 +54,8 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
     const playerIds = useSelector(getPlayerIds);
     const socket = useSocket();
 
+    const isHost = useMemo(() => playerIds[0] === socket?.id, [playerIds, socket]);
+
     const onGameStart = useCallback(() => {
         socket?.emit(events.rooms.GAME_START, { gameOptions });
     }, [socket, gameOptions]);
@@ -61,6 +63,27 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
     const onRoomLeave = useCallback(() => {
         socket?.emit(events.rooms.DISCONNECT_FROM_ROOM);
     }, [socket]);
+
+    // Update game options when the host changes them
+    useEffect(() => {
+        if (!isHost && setGameOptions) {
+            socket?.on(events.rooms.OPTIONS_CHANGED, (gameOptions) => {
+                setGameOptions(gameOptions);
+            });
+        }
+
+        return () => {
+            if (!isHost && setGameOptions) {
+                socket?.off(events.rooms.OPTIONS_CHANGED);
+            }
+        };
+    }, [isHost, setGameOptions, socket]);
+
+    useEffect(() => {
+        if (isHost) {
+            socket?.emit(events.rooms.OPTIONS_CHANGED, { gameOptions });
+        }
+    }, [isHost, gameOptions, socket]);
 
     const playerProgress = (numberOfPlayers / maxNumberOfPlayers) * 100;
 
@@ -100,6 +123,11 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
                                     sx={{ height: 8, borderRadius: 4 }}
                                 />
                             </Box>
+                            <Typography>
+                                {isHost
+                                    ? 'You are the host. You can change the game options and start the game when ready.'
+                                    : 'Waiting for the host to start the game...'}
+                            </Typography>
 
                             <List sx={{ bgcolor: 'background.paper', borderRadius: 1 }}>
                                 <Typography variant="h6" sx={{ m: 2 }}>
@@ -159,9 +187,7 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
                             size="large"
                             startIcon={<PlayArrow />}
                             onClick={onGameStart}
-                            disabled={
-                                numberOfPlayers < minNumberOfPlayers || socket?.id !== playerIds[0]
-                            }
+                            disabled={numberOfPlayers < minNumberOfPlayers || !isHost}
                             sx={{ px: 4, py: 1.5 }}
                         >
                             Start Game

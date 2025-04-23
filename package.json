@@ -1,6 +1,6 @@
 {
     "name": "cardgameforge",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "types": "./dist/types/index.d.ts",
     "license": "MIT",
     "scripts": {

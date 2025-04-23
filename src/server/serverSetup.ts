@@ -1,7 +1,14 @@
 import { createServer } from 'http';
 import { Server, ServerOptions } from 'socket.io';
 import { GameConfig, SocketListener } from './types';
-import { joinRoom, disconnectFromRoom, disconnect, gameStart, playMove } from './listeners';
+import {
+    joinRoom,
+    disconnectFromRoom,
+    disconnect,
+    gameStart,
+    playMove,
+    optionsChanged,
+} from './listeners';
 import { events } from '../shared';
 import { setLoadedConfig } from './state';
 
@@ -24,13 +31,13 @@ const setupAndRunServer = <
 ) => {
     const httpServer = createServer();
     const io = new Server(httpServer, {
+        ...opts,
         cors: {
             origin: 'http://localhost:5173',
             methods: ['GET', 'POST'],
             credentials: true,
             ...(opts.cors || {}),
         },
-        ...opts,
     });
     setLoadedConfig<CustomState, CustomGameOptions, CustomZone, CustomCard>(gameConfig);
 
@@ -44,6 +51,8 @@ const setupAndRunServer = <
         socket.on(events.rooms.JOIN_ROOM, withSocketGameContext(joinRoom));
 
         socket.on(events.rooms.DISCONNECT_FROM_ROOM, withSocketGameContext(disconnectFromRoom));
+
+        socket.on(events.rooms.OPTIONS_CHANGED, withSocketGameContext(optionsChanged));
 
         socket.on(events.rooms.GAME_START, withSocketGameContext(gameStart));
 

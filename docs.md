@@ -1,3 +1,39 @@
+# Table of Contents
+
+-   [Library CardGameForge](#library-cardgameforge)
+    -   [Installation](#installation)
+    -   [Concepts and architecture](#concepts-and-architecture)
+        -   [Concepts](#concepts)
+            -   [Game State](#game-state)
+            -   [Phases](#phases)
+            -   [Actions](#actions)
+            -   [Moves](#moves)
+            -   [Turn Order](#turn-order)
+            -   [End Game Condition](#end-game-condition)
+            -   [History](#history)
+            -   [Card Selection](#card-selection)
+            -   [Zones and Cards](#zones-and-cards)
+        -   [Modules](#modules)
+    -   [API Reference](#api-reference)
+        -   [Server](#server)
+            -   [Types](#types-server)
+                -   [General](#general)
+                -   [GameConfig](#gameconfig)
+                -   [Game Objects](#game-objects)
+                -   [Game state](#game-state)
+                -   [Game state context](#game-state-context)
+            -   [Functions](#functions)
+            -   [Constants](#constants)
+            -   [Actions](#actions-server)
+        -   [Client](#client)
+            -   [Types](#types-client)
+            -   [Actions](#actions-client)
+            -   [Game Context](#game-context)
+            -   [React hooks](#react-hooks)
+            -   [Selectors](#selectors)
+            -   [UI Components](#ui-components)
+    -   [Example app](#example-app)
+
 # Library CardGameForge
 
 These are the docs for the library called CardGameForge that allows you to create card game prototypes quickly using React and Node.js. It comes with a server authoritative game state management synchronised to all joined clients using WebSockets (with the help of the Socket.io library). The client side of this library offers pre-made game context that joins to the server effortlessly and with components that are used in almost every card game you might think of.
@@ -102,7 +138,7 @@ import ... from 'cardgameforge/client';
 
 ### Server
 
-#### Types
+#### Types server
 
 ##### General
 
@@ -365,7 +401,7 @@ The main function for creating and running the game server is `setupAndRunServer
 -   `actionTypes` - Types of actions that can be dispatched out of the box
 -   `EVERYBODY` - Constant used to set the active player to everybody
 
-#### Actions
+#### Actions server
 
 CardGameForge comes with pre-made actions that can be dispatched to the server to update the game state.
 The actions are dispatched using the `dispatch` function provided by the `GameContext`. \
@@ -444,11 +480,44 @@ export const setScore: ActionTemplate<
 };
 ```
 
+**Example of creating own move:**
+
+```javascript
+import { MoveDefinition } from 'cardgameforge/server';
+const passMove: MoveDefinition<any, TichuState, TichuGameSettings, any, TichuCard> = {
+    name: 'PASS',
+    allowedPhases: ['PLAY_CARDS'],
+    canExecute: (_, ctx) => {
+        const playedCards = ctx.getState().customState.playedCombination.cards;
+        if (playedCards.length === 0) {
+            return {
+                canExecute: false,
+                reason: "You can't pass if a card hasn't been played",
+            };
+        }
+        return { canExecute: true };
+    },
+    execute: (_, ctx, meta) => {
+        ctx.dispatchAction <
+            AddNumberOfPassesPayload >
+            (customActions.ADD_NUMBER_OF_PASSES,
+            {
+                numberOfPasses: 1,
+            },
+            meta);
+    },
+    message: (_, __, meta) => {
+        const playerNickname = meta.playerNickname;
+        return `${playerNickname} passed`;
+    },
+};
+```
+
 ### Client
 
 In addition to the exported features listed below, `useSelector, useDispatch and createSelector` are exported so that you don't need to install `react-redux` separately.
 
-#### Types
+#### Types client
 
 -   `ReduxState<CustomState, CustomGameOptions, CustomZone, CustomCard>` - Redux game state that has only one prop - game - that holds the game state - same as at the server but enhanced with `NetworkState` and `selection: Selection`
 
@@ -471,7 +540,7 @@ In addition to the exported features listed below, `useSelector, useDispatch and
         -   `default: React.ComponentType<{ card: Card<CustomCard>; zone: Zone<CustomZone, CustomCard>; }>` - Default card component for the display type in that zone for that display type
         -   `zones?: { [zoneId: string]: React.ComponentType<{ card: Card<CustomCard>; zone: Zone<CustomZone, CustomCard>; }> }` - Registry of card components for specific zone
 
-#### Actions
+#### Actions client
 
 There are no state changes happening on the client side except for the selection mechanism.
 Below are the actions that can be dispatched using `useDispatch` function on the client to update the selected cards in zones in the client game state. These changes are local and do not affect the server game state.
@@ -509,7 +578,7 @@ dispatch(selectCard({ zoneId: 'hand', cardId: 'card1' }));
 #### Game Context
 
 Exports game context functionality for managing game state and network communication - it hooks the events from the server and updates the game state on the client side.
-You pass the display registry of the cards, sever URL address and can pass custom material theme if you don't want ot use the default one.
+You pass the display registry of the cards, sever URL address and can pass custom material theme if you don't want to use the default one.
 Use the `GameContextProvider` component to wrap your game with the game context.
 
 -   `GameContextProvider`
@@ -714,7 +783,7 @@ CardGameForge provides pre-made UI components that you can use to build your gam
         <HistoryLog />;
         ```
 
--   `HistoryPopup` - Component that displays the last message from the history. It uses the `useNotification` hook to display the message.
+-   `HistoryPopup` - Component that displays new messages from the history. It uses the `useNotification` hook to display the message.
 
     -   **Props**: None
     -   **Example**:
@@ -745,11 +814,15 @@ CardGameForge provides pre-made UI components that you can use to build your gam
         -   `showFirstCard?: boolean` - Whether to show the first card - only used if styleType is 'deck'
         -   `sortFn?: (cards: Card<any>[]) => Card<any>[]` - The function to call to sort the cards - only used if styleType is 'hand'
         -   `allFaceDown?: boolean` - Whether to show all cards face down - only used if styleType is 'pile'
+        -   `hoverStyle?: 'over' | 'overDelay' | 'none'` - The style to apply when the card is hovered. Over increases the z index over the other cards in hand.
+            overDelay does the same after two-second delay. None does not increase the z index. Only when styleType is 'hand'.
+        -   `disableHoverAnimation?: boolean` - Whether to disable the hover animation. Only when styleType is 'hand'.
     -   **Example**:
         ```javascript
         import { Zone } from 'cardgameforge/client';
         //...
         <Zone zoneId="deck" styleType="deck" topCardsCount={5} />;
+        <Zone zoneId="hand" styleType="hand" handStyle="line" hoverStyle="none" sortFn={sortFn} />;
         ```
 
 -   `Card` - Component that displays a card in a zone based on the card id and zone id. It uses the display registry to get the card display component. It also handles the face down state of the card based on the zone owner and the current player.
@@ -797,3 +870,8 @@ CardGameForge provides pre-made UI components that you can use to build your gam
             title="Selected cards"
         />;
         ```
+
+## Example app
+
+You can find a game made with CardGameForge in the [example](https://github.com/ReDa0123/CardGameForge/tree/master/examples/tichu) folder of this repository. It is an implementation of a card game Tichu, and it uses the library to manage the game state and the UI.
+You can see there how you can create the game server with custom game config and how to use the UI components and hooks to create the game client.
